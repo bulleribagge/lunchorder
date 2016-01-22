@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/bulleribagge/lunchorder/issues"
   },
-  "homepage": "https://github.com/bulleribagge/lunchorder#readme"
+  "homepage": "https://github.com/bulleribagge/lunchorder#readme",
+  "dependencies": {
+      "express": "*"
+  }
 }
