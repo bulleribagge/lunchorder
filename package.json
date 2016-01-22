@@ -1,0 +1,19 @@
+{
+  "name": "lunchorder",
+  "version": "1.0.0",
+  "description": "Tool to help you order dem lunches",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bulleribagge/lunchorder.git"
+  },
+  "author": "Martin Almén",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bulleribagge/lunchorder/issues"
+  },
+  "homepage": "https://github.com/bulleribagge/lunchorder#readme"
+}
