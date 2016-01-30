@@ -14,7 +14,7 @@ app.all('/derp', function(req, res){
 
 app.all('/db', function(req, res){
    
-   console.log(process.env.DATABASE_URL)
+   console.log(process.env.DB_URL)
    /*
    pg.connect(process.env.DATABASE_URL, function(err, client){
       if(err) throw err;
