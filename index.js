@@ -4,6 +4,10 @@ var pg = require('pg');
 var app = express();
 var port = 3000;
 
+app.get('/', function(req, res){
+    res.send('Hello World!');
+});
+
 app.all('/derp', function(req, res){
    res.send('fleerp 2'); 
 });
