@@ -19,6 +19,7 @@
   "homepage": "https://github.com/bulleribagge/lunchorder#readme",
   "dependencies": {
       "express": "*",
-      "pg": "*"
+      "pg": "*",
+      "body-parser": "*"
   }
 }

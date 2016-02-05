@@ -3,7 +3,7 @@ var pg = require('pg');
 var router = express.Router();
 
 router.all('/', function(req, res){
-    console.log(req.params('text'));
+    console.log(req.body);
     res.send('flerp');
 });
 
