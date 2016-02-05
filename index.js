@@ -3,27 +3,34 @@ var pg = require('pg');
 
 var app = express();
 var port = 3000;
+var routes = require('./routes/lunchorder')
+
+app.use('/', routes);
 
 app.get('/', function(req, res){
     res.send('Hello World!');
 });
 
-app.all('/derp', function(req, res){
-   res.send('fleerp 2'); 
-});
-
-app.all('/db', function(req, res){
+app.all('/lunchorders', function(req, res){
+    
    pg.connect(process.env.DB_URL, function(err, client){
       if(err) throw err;
       console.log('Connected to postgres! Getting orders...');
       
+      var orders = [];
+      
       client
-      .query('SELECT * FROM order;')
+      .query('SELECT * FROM public.order where date = CURRENT_DATE')
       .on('row', function(row){
-          console.log(JSON.stringify(row));
+          orders.push(JSON.stringify(row));
+      })
+      .on('end', function(result){
+          res.send(orders);
       });
    });
 });
+
+app.all('/')
 
 app.listen(process.env.PORT || port);
 console.log('listening on port ' + port + ' ...')
