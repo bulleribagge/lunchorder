@@ -1,5 +1,6 @@
 var pg = require('pg');
 var Order = require('../models/order');
+var async = require('async');
 
 function OrderController() { }
 
@@ -22,35 +23,60 @@ OrderController.prototype.saveOrder = function(order, callback) {
 }
 
 OrderController.prototype.getOrderForUser = function(user, callback) {
-    pg.connect(process.env.DB_URL, function(err, client, done){
-       if (err) throw err;
-       
-       var order = new Order();
-       
-       client.query('SELECT date, main, side, sauce, drink, extra FROM public."order" WHERE "user" = $1 ORDER BY date DESC LIMIT 1', [user])
-       .on('row', function(row)
-       {
-           order.date = row.date;
-           order.main = row.main;
-           order.sideorder = row.side;
-           order.sauce = row.sauce;
-           order.drink = row.drink;
-           order.extra = row.extra;
-       })
-       .on('end', function(){
-           done();
-           callback(order);
-       }); 
+    pg.connect(process.env.DB_URL, function(err, client, done) {
+        if (err) throw err;
+
+        var order = new Order();
+
+        client.query('SELECT "user", date, main, side, sauce, drink, extra FROM public."order" WHERE "user" = $1 ORDER BY id DESC LIMIT 1', [user])
+            .on('row', function(row) {
+                order.user = row.user;
+                order.date = row.date;
+                order.main = row.main;
+                order.sideorder = row.side;
+                order.sauce = row.sauce;
+                order.drink = row.drink;
+                order.extra = row.extra;
+            })
+            .on('end', function() {
+                done();
+                callback(order);
+            });
     });
 }
 
-OrderController.prototype.getAllOrders = function(callback){
-    pg.connect(process.env.DB_URL, function(err, client, done){
-       if(err) throw err;
-       
-       var orders = [];
-       
-       client.query('') 
+OrderController.prototype.getTodaysOrders = function(callback) {
+    var _this = this;
+    var orders = [];
+
+    this.getTodaysUsers(function(users) {
+        if (users.length > 0) {
+            async.each(users, function(user, callback) {
+                _this.getOrderForUser(user, function(order) {
+                    orders.push(order);
+                    callback();
+                });
+            }, function(err) {
+                callback(orders);
+            });
+        }
+    });
+}
+
+OrderController.prototype.getTodaysUsers = function(callback) {
+    pg.connect(process.env.DB_URL, function(err, client, done) {
+        if (err) throw err;
+
+        var users = [];
+
+        client.query('SELECT DISTINCT "user" FROM public."order" WHERE "date" >= CURRENT_DATE')
+            .on('row', function(row) {
+                users.push(row.user);
+            })
+            .on('end', function() {
+                done();
+                callback(users);
+            });
     });
 }
 

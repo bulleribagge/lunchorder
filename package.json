@@ -23,5 +23,8 @@
     "pg": "*",
     "request": "^2.69.0",
     "yargs": "^4.3.2"
+  },
+  "devDependencies": {
+    "async": "^1.5.2"
   }
 }

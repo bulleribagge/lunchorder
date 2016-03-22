@@ -18,24 +18,23 @@ router.all('/', function(req, res) {
         console.log('command: placeorder');
         var order = new Order(user, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
         orderController.saveOrder(order, function() {
-                console.log('order saved');
-                res.send('order succesfully saved: ' + JSON.stringify(order));
-            }
+            console.log('order saved');
+            res.send('order succesfully saved: ' + JSON.stringify(order));
+        }
         );
     } else if (command == 'deleteorder') {
         console.log('command: deleteorder');
     } else if (command == 'getorder') {
         console.log('command: getorder');
-        if(!argsv.a)
-        {
+        if (!argsv.a) {
             //only get users order
-            orderController.getOrderForUser(user, function(order){
+            orderController.getOrderForUser(user, function(order) {
                 res.send(JSON.stringify(order));
             });
-        }else{
+        } else {
             //get all orders
-            orderController.getAllOrders(function(orders){
-               res.send(Json.stringify(orders)); 
+            orderController.getTodaysOrders(function(orders) {
+                res.send(JSON.stringify(orders));
             });
         }
     }
