@@ -29,11 +29,11 @@ router.all('/', function(req, res) {
             res.send('Thank you for your order!');
         }
         );
-    } else if (command == 'deleteorder') {
-        console.log('deleteorder');
+    } else if (command == 'cancelorder') {
+        console.log('cancelorder');
         if (!argsv.a) {
             orderController.deleteOrderForUser(user, function() {
-                res.send('Your order has been deleted. Sorry you won\'t be dining with us  :(');
+                res.send('Your order has been canceled. Sorry you won\'t be dining with us  :(');
             });
         }
     } else if (command == 'getorder') {
