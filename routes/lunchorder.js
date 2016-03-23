@@ -9,14 +9,12 @@ var OrderController = require('../controllers/ordercontroller');
 router.all('/', function(req, res) {
     
     res.setHeader('Content-type', 'application/json');
-    res.send({"text" : "Hi guys\nThis is a test message"});
-    return;
     
     try {
         var argsv = yargs.parse(req.body.text);
     } catch (e) {
         var help = new Help();
-        res.send(JSON.stringify({ "text": help.getHelp() }));
+        res.send({ "text": help.getHelp() });
         return;
     }
 
@@ -43,7 +41,6 @@ router.all('/', function(req, res) {
         if (!argsv.a) {
             //only get users order
             orderController.getOrderForUser(user, function(order) {
-                console.log(JSON.stringify(order));
                 res.send(JSON.stringify(order));
             });
         } else {
@@ -55,7 +52,7 @@ router.all('/', function(req, res) {
     } else {
         console.log('unknown command');
         var help = new Help();
-        res.send(JSON.stringify({ "text": help.getHelp() }));
+        res.send({ "text": help.getHelp() });
     }
 });
 
