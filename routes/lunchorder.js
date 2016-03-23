@@ -11,8 +11,9 @@ router.all('/', function(req, res) {
         var argsv = yargs.parse(req.body.text);
     }catch(e){
         var help = new Help();
-        res.send(help.getHelp());
-        res.end();
+        //res.send(help.getHelp());
+        res.send('FLEERP');
+        return;
     }
 
     var user = req.body.user_name;
