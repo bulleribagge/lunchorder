@@ -1,20 +1,20 @@
 function Help() { }
 
 Help.prototype.placeOrderHelp = `placeorder: Places an order
-                            </br>Usage: placeorder -m "main dish" -d "drink" --so "side order" -s "sauce" -e "extra"
-                            </br>Example: placeorder -m "BBQ" --so "Pommes" -d "Pepsi" -s "Aioli" -e "Ingen lök"
-                            </br>Any values not supplied will be default according to:
-                            </br>-m = "BBQ" -d = "Pepsi" -s "Aioli" --so "Pommes"
-                            </br>If you wish to change your order, just place a new one.`;
+                            \nUsage: placeorder -m "main dish" -d "drink" --so "side order" -s "sauce" -e "extra"
+                            \nExample: placeorder -m "BBQ" --so "Pommes" -d "Pepsi" -s "Aioli" -e "Ingen lök"
+                            \nAny values not supplied will be default according to:
+                            \n-m = "BBQ" -d = "Pepsi" -s "Aioli" --so "Pommes"
+                            \nIf you wish to change your order, just place a new one.`;
                             
 Help.prototype.getOrderHelp = `getorder: Gets your order
-                            </br>Usage: getorder`
+                            \nUsage: getorder`
                             
 Help.prototype.cancelOrderHelp = `cancelorder: Cancels your order
-                            </br>Usage: cancelorder`
+                            \nUsage: cancelorder`
 
 Help.prototype.getHelp = function(){
-    return this.placeOrderHelp + '</br></br>' + this.getOrderHelp + '</br></br>' + this.cancelOrderHelp;
+    return this.placeOrderHelp + '\n\n' + this.getOrderHelp + '\n\n' + this.cancelOrderHelp;
 }
 
 module.exports = Help;
