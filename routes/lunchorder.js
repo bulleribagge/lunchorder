@@ -7,7 +7,7 @@ var OrderController = require('../controllers/ordercontroller');
 
 router.all('/', function(req, res) {
 
-    //console.log(req.body);
+    console.log(req.body);
     var argsv = yargs.parse(req.body.text);
 
     var user = req.body.user_name;
