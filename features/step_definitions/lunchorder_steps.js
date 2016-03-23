@@ -9,7 +9,6 @@ module.exports = function() {
         var user = 'Steve';
         this.lastOrder[user] = {};
         this.placeOrderForUser(user, function(res) {
-            assert(res.indexOf('order succesfully saved: ') != -1);
             callback();
         });
     });
@@ -25,7 +24,6 @@ module.exports = function() {
         }
 
         this.placeOrderForUser(user, function(res) {
-            assert(res.indexOf('order succesfully saved: ') != -1);
             callback();
         });
     });
@@ -50,7 +48,6 @@ module.exports = function() {
     });
 
     this.When(/^many people have ordered$/, function(callback) {
-
         var world = this;
         var users = ['Steve', 'Billy', 'Dan', 'Jessica', 'Gorbatchov', 'Putin'];
         for (var u of users) {
@@ -73,16 +70,25 @@ module.exports = function() {
         });
     });
 
+    this.When(/^I delete it$/, function(callback) {
+        var world = this;
+        world.deleteOrderForUser('Steve', function(res) {
+            callback();
+        });
+    });
+    
+    this.When(/^I wait for (\d+) seconds$/, function(seconds, callback){
+       setTimeout(function(){
+           callback();
+       }, parseInt(seconds) * 1000); 
+    });
+
     /* ----------------------------- THEN ----------------------------- */
 
     this.Then(/^I should see my order$/, function(callback) {
         var user = 'Steve';
-        var orderText = 'getorder';
-
-        this.slackRequest.text = orderText;
         var lastOrder = this.lastOrder[user];
         var world = this;
-
         this.getOrderForUser(user, function(res) {
             var o = JSON.parse(res);
             world.compareToLastOrderForUser(user, o, function(equal) {
@@ -94,10 +100,6 @@ module.exports = function() {
 
     this.Then(/^I should get default values$/, function(callback) {
         var user = 'Steve';
-        var orderText = 'getorder';
-
-        this.slackRequest.text = orderText;
-
         this.getOrderForUser(user, function(res) {
             var o = JSON.parse(res);
             assert.equal(o.main, 'BBQ');
@@ -113,7 +115,6 @@ module.exports = function() {
         var world = this;
         this.getAllOrders(function(body) {
             var orders = JSON.parse(body);
-
             async.each(orders, function(order, callback) {
                 world.compareToLastOrderForUser(order.user, order, function(equal) {
                     assert(equal);
@@ -122,6 +123,15 @@ module.exports = function() {
             }, function() {
                 callback();
             });
+        });
+    });
+
+    this.Then(/^I should not see my order$/, function(callback) {
+        world = this;
+        this.getOrderForUser('Steve', function(res) {
+            var o = JSON.parse(res);
+            assert(world.isEmpty(o));
+            callback();
         });
     });
 }

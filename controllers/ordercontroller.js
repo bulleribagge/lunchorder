@@ -26,10 +26,11 @@ OrderController.prototype.getOrderForUser = function(user, callback) {
     pg.connect(process.env.DB_URL, function(err, client, done) {
         if (err) throw err;
 
-        var order = new Order();
+        var order = {};
 
         client.query('SELECT "user", date, main, side, sauce, drink, extra FROM public."order" WHERE "user" = $1 ORDER BY id DESC LIMIT 1', [user])
             .on('row', function(row) {
+                order = new Order();
                 order.user = row.user;
                 order.date = row.date;
                 order.main = row.main;
@@ -77,6 +78,18 @@ OrderController.prototype.getTodaysUsers = function(callback) {
                 done();
                 callback(users);
             });
+    });
+}
+
+OrderController.prototype.deleteOrderForUser = function(user, callback){
+    pg.connect(process.env.DB_URL, function(err, client, done){
+       if(err) throw err;
+       
+       client.query('DELETE FROM public."order" WHERE "user" = $1 AND "date" >= CURRENT_DATE', [user])
+       .on('end', function(){
+           done();
+           callback();
+       }) 
     });
 }
 

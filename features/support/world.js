@@ -76,6 +76,7 @@ function World() {
     };
 
     this.getOrderForUser = function(user, callback) {
+        this.slackRequest.text = 'getorder';
         var data = this.slackRequest;
         this.slackRequest.user_name = user;
         request.post(
@@ -92,6 +93,7 @@ function World() {
     };
 
     this.placeOrderForUser = function(user, callback) {
+        this.slackRequest.text = 'placeorder';
         this.slackRequest.text = this.buildOrderTextForUser(user);
         var data = this.slackRequest;
         this.slackRequest.user_name = user;
@@ -109,8 +111,23 @@ function World() {
     }
 
     this.getAllOrders = function(callback) {
-        
         this.slackRequest.text = 'getorder -a';
+        var data = this.slackRequest;
+        request.post(
+            'http://localhost:3000',
+            { form: data },
+            function(error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    callback(body);
+                } else {
+                    throw error;
+                }
+            }
+        )
+    }
+
+    this.deleteOrderForUser = function(user, callback) {
+        this.slackRequest.text = 'deleteorder';
         var data = this.slackRequest;
         request.post(
             'http://localhost:3000',
@@ -133,6 +150,15 @@ function World() {
         } else {
             callback(false);
         }
+    }
+
+    this.isEmpty = function(o) {
+        for (var i in o) {
+            if (o.hasOwnProperty(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

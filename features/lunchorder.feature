@@ -18,3 +18,8 @@ Feature: Order lunch
     Scenario: Get all orders
         When many people have ordered
         Then I should see all orders
+        
+    Scenario: Delete order
+        When I order lunch
+        And I delete it
+        Then I should not see my order
