@@ -14,7 +14,7 @@ Help.prototype.cancelOrderHelp = `*cancelorder*: Cancels your order
 *Usage*: cancelorder`
 
 Help.prototype.getHelp = function(){
-    return this.placeOrderHelp + '\n' + this.getOrderHelp + '\n' + this.cancelOrderHelp;
+    return this.placeOrderHelp + '\n\n' + this.getOrderHelp + '\n\n' + this.cancelOrderHelp;
 }
 
 module.exports = Help;
