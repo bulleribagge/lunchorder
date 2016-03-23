@@ -34,7 +34,5 @@ app.all('/lunchorders', function(req, res){
    });
 });
 
-app.all('/')
-
 app.listen(process.env.PORT || port);
-console.log('listening on port ' + port + ' ...')
+console.log('listening on port ' + port + ' ...');

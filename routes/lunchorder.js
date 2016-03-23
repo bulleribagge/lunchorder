@@ -3,33 +3,38 @@ var pg = require('pg');
 var yargs = require('yargs');
 var router = express.Router();
 var Order = require('../models/order');
+var Help = require('../help');
 var OrderController = require('../controllers/ordercontroller');
 
 router.all('/', function(req, res) {
-
-    console.log(req.body);
-    var argsv = yargs.parse(req.body.text);
+    try{
+        var argsv = yargs.parse(req.body.text);
+    }catch(e){
+        var help = new Help();
+        res.send(help.getHelp());
+        return;
+    }
 
     var user = req.body.user_name;
     var orderController = new OrderController();
     var command = argsv._;
 
     if (command == 'placeorder') {
-        console.log('command: placeorder');
+        console.log('placeorder');
         var order = new Order(user, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
         orderController.saveOrder(order, function() {
-            res.send('order succesfully saved: ' + JSON.stringify(order));
+            res.send('Thank you for your order!');
         }
         );
     } else if (command == 'deleteorder') {
-        console.log('command: deleteorder');
+        console.log('deleteorder');
         if (!argsv.a) {
             orderController.deleteOrderForUser(user, function() {
                 res.send('Your order has been deleted. Sorry you won\'t be dining with us  :(');
             });
         } 
     } else if (command == 'getorder') {
-        console.log('command: getorder');
+        console.log('getorder');
         if (!argsv.a) {
             //only get users order
             orderController.getOrderForUser(user, function(order) {
@@ -48,12 +53,10 @@ router.all('/', function(req, res) {
 router.all('/getorders', function(req, res) {
     pg.connect(process.env.DB_URL, function(err, client) {
         if (err) throw err;
-        console.log('Connected to postgres! Getting orders...');
 
         var orders = [];
 
-        client
-            .query('SELECT * FROM public.order where date = CURRENT_DATE')
+        client.query('SELECT * FROM public.order where date = CURRENT_DATE')
             .on('row', function(row) {
                 orders.push(JSON.stringify(row));
             })
