@@ -7,12 +7,15 @@ var Help = require('../help');
 var OrderController = require('../controllers/ordercontroller');
 
 router.all('/', function(req, res) {
-    try{
+    
+    res.send({"text" : "Hi guys\nThis is a test message"});
+    return;
+    
+    try {
         var argsv = yargs.parse(req.body.text);
-    }catch(e){
+    } catch (e) {
         var help = new Help();
-        //res.send(help.getHelp());
-        res.send('FLEERP');
+        res.send(JSON.stringify({ "text": help.getHelp() }));
         return;
     }
 
@@ -33,7 +36,7 @@ router.all('/', function(req, res) {
             orderController.deleteOrderForUser(user, function() {
                 res.send('Your order has been deleted. Sorry you won\'t be dining with us  :(');
             });
-        } 
+        }
     } else if (command == 'getorder') {
         console.log('getorder');
         if (!argsv.a) {
@@ -48,10 +51,10 @@ router.all('/', function(req, res) {
                 res.send(JSON.stringify(orders));
             });
         }
-    } else{
+    } else {
         console.log('unknown command');
         var help = new Help();
-        res.send(JSON.stringify({"text": help.getHelp()}));
+        res.send(JSON.stringify({ "text": help.getHelp() }));
     }
 });
 
