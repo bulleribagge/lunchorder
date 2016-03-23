@@ -51,7 +51,7 @@ router.all('/', function(req, res) {
     } else{
         console.log('unknown command');
         var help = new Help();
-        res.send(help.getHelp());
+        res.send({"text": help.getHelp()});
     }
 });
 
