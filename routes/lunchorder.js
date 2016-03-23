@@ -8,7 +8,7 @@ var OrderController = require('../controllers/ordercontroller');
 
 router.all('/', function(req, res) {
     
-    res.send({"text" : "Hi guys\nThis is a test message"});
+    res.send(JSON.stringify({"text" : "Hi guys\nThis is a test message"}));
     return;
     
     try {
