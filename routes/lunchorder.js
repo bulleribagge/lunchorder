@@ -48,23 +48,11 @@ router.all('/', function(req, res) {
                 res.send(JSON.stringify(orders));
             });
         }
+    } else{
+        console.log('unknown command');
+        var help = new Help();
+        res.send(help.getHelp());
     }
-});
-
-router.all('/getorders', function(req, res) {
-    pg.connect(process.env.DB_URL, function(err, client) {
-        if (err) throw err;
-
-        var orders = [];
-
-        client.query('SELECT * FROM public.order where date = CURRENT_DATE')
-            .on('row', function(row) {
-                orders.push(JSON.stringify(row));
-            })
-            .on('end', function(result) {
-                res.send(orders);
-            });
-    });
 });
 
 module.exports = router
