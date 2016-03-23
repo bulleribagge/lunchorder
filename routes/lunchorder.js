@@ -12,7 +12,7 @@ router.all('/', function(req, res) {
     }catch(e){
         var help = new Help();
         res.send(help.getHelp());
-        return;
+        res.end();
     }
 
     var user = req.body.user_name;
