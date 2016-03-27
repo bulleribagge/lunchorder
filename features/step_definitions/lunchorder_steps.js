@@ -3,7 +3,13 @@ var assert = require('assert');
 var async = require('async');
 
 module.exports = function() {
-
+    /* ----------------------------- GIVEN ---------------------------- */
+    
+    this.Given(/^I have an invalid slack token$/, function(callback){
+        this.slackRequest.token = 'invalid_token';
+        callback();
+    });
+    
     /* ----------------------------- WHEN ----------------------------- */
     this.When(/^I order lunch without parameters$/, function(callback) {
         var user = 'Steve';
@@ -134,4 +140,9 @@ module.exports = function() {
             callback();
         });
     });
+    
+    this.Then(/^I should get an HTTP error (\d+) back$/, function(code, callback){
+        assert.equal(this.lastResponse.statusCode, code);
+        callback();
+    })
 }

@@ -28,3 +28,8 @@ Feature: Order lunch
         When I order lunch twice
         And I cancel it
         Then I should not see my order
+        
+    Scenario: Order with invalid slack token
+        Given I have an invalid slack token
+        When I order lunch
+        Then I should get an HTTP error 403 back

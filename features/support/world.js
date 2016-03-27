@@ -3,7 +3,7 @@ var request = require('request');
 
 function World() {
     this.slackRequest = {
-        token: '8oe5iPmwPnAMBcUGo5cRxl3n',
+        token: 'testing123',
         team_id: 'T0001',
         team_domain: 'example',
         channel_id: 'C2147483705',
@@ -14,6 +14,8 @@ function World() {
         text: '',
         response_url: 'https://hooks.slack.com/commands/1234/5678'
     };
+
+    this.lastResponse = null;
 
     this.lastOrder = [];
 
@@ -93,6 +95,7 @@ function World() {
     };
 
     this.placeOrderForUser = function(user, callback) {
+        _this = this;
         this.slackRequest.text = 'placeorder';
         this.slackRequest.text = this.buildOrderTextForUser(user);
         var data = this.slackRequest;
@@ -104,6 +107,7 @@ function World() {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
+                    _this.lastResponse = response;
                     throw error;
                 }
             }
