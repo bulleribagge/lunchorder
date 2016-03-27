@@ -10,7 +10,7 @@ router.all('/', function(req, res) {
     
     if(req.body.token != process.env.SLACK_TOKEN)
     {
-        res.status(403).send({error: 'Unauthorized'});
+        res.sendStatus(403);
         return;
     }
     
