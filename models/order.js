@@ -12,6 +12,11 @@ class Order
         this.drink = drink == null ? 'Pepsi' : drink;
         this.extra = extra;
     }
+    
+    toString()
+    {
+        return "*" + this.user + "* " + this.main + " " + this.sideorder + " " + this.sauce + " " + this.drink == null ? "" : this.extra;
+    } 
 }
 
 module.exports = Order;

@@ -47,7 +47,7 @@ router.all('/', function(req, res) {
         if (!argsv.a) {
             //only get users order
             orderController.getOrderForUser(user, function(order) {
-                res.send(JSON.stringify(order));
+                res.send(order.toString());
             });
         } else {
             //get all orders
