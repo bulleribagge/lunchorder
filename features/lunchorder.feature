@@ -19,7 +19,12 @@ Feature: Order lunch
         When many people have ordered
         Then I should see all orders
         
-    Scenario: Delete order
+    Scenario: Cancel order
         When I order lunch
-        And I delete it
+        And I cancel it
+        Then I should not see my order
+        
+    Scenario: Cancel order when I've made two orders
+        When I order lunch twice
+        And I cancel it
         Then I should not see my order

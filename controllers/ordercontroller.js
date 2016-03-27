@@ -28,7 +28,7 @@ OrderController.prototype.getOrderForUser = function(user, callback) {
 
         var order = {};
 
-        client.query('SELECT "user", date, main, side, sauce, drink, extra FROM public."order" WHERE "user" = $1 ORDER BY id DESC LIMIT 1', [user])
+        client.query('SELECT "user", date, main, side, sauce, drink, extra FROM public."order" WHERE "user" = $1 AND canceled = FALSE ORDER BY id DESC LIMIT 1', [user])
             .on('row', function(row) {
                 order = new Order();
                 order.user = row.user;
@@ -70,7 +70,7 @@ OrderController.prototype.getTodaysUsers = function(callback) {
 
         var users = [];
 
-        client.query('SELECT DISTINCT "user" FROM public."order" WHERE "date" >= CURRENT_DATE')
+        client.query('SELECT DISTINCT "user" FROM public."order" WHERE "date" >= CURRENT_DATE AND canceled = FALSE')
             .on('row', function(row) {
                 users.push(row.user);
             })
@@ -81,15 +81,15 @@ OrderController.prototype.getTodaysUsers = function(callback) {
     });
 }
 
-OrderController.prototype.deleteOrderForUser = function(user, callback){
+OrderController.prototype.cancelOrderForUser = function(user, callback){
     pg.connect(process.env.DB_URL, function(err, client, done){
        if(err) throw err;
        
-       client.query('DELETE FROM public."order" WHERE "user" = $1 AND "date" >= CURRENT_DATE', [user])
+       client.query('UPDATE public."order" SET canceled = TRUE WHERE "user" = $1 AND "date" >= CURRENT_DATE', [user])
        .on('end', function(){
            done();
            callback();
-       }) 
+       });
     });
 }
 

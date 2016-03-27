@@ -126,8 +126,8 @@ function World() {
         )
     }
 
-    this.deleteOrderForUser = function(user, callback) {
-        this.slackRequest.text = 'deleteorder';
+    this.cancelOrderForUser = function(user, callback) {
+        this.slackRequest.text = 'cancelorder';
         var data = this.slackRequest;
         request.post(
             'http://localhost:3000',

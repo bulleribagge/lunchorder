@@ -70,9 +70,9 @@ module.exports = function() {
         });
     });
 
-    this.When(/^I delete it$/, function(callback) {
+    this.When(/^I cancel it$/, function(callback) {
         var world = this;
-        world.deleteOrderForUser('Steve', function(res) {
+        world.cancelOrderForUser('Steve', function(res) {
             callback();
         });
     });

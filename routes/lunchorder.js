@@ -32,7 +32,7 @@ router.all('/', function(req, res) {
     } else if (command == 'cancelorder') {
         console.log('cancelorder');
         if (!argsv.a) {
-            orderController.deleteOrderForUser(user, function() {
+            orderController.cancelOrderForUser(user, function() {
                 res.send('Your order has been canceled. Sorry you won\'t be dining with us  :(');
             });
         }
