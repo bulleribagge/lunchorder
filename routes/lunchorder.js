@@ -4,23 +4,22 @@ var yargs = require('yargs');
 var router = express.Router();
 var Order = require('../models/order');
 var Help = require('../help');
+var Util = require('../util');
 var OrderController = require('../controllers/ordercontroller');
 
 router.all('/', function(req, res) {
-    
-    if(req.body.token != process.env.SLACK_TOKEN)
-    {
+
+    if (req.body.token != process.env.SLACK_TOKEN) {
         res.sendStatus(403);
         return;
     }
-    
+
     res.setHeader('Content-type', 'application/json');
-    
+
     try {
         var argsv = yargs.parse(req.body.text);
     } catch (e) {
-        var help = new Help();
-        res.send({ "text": help.getHelp() });
+        res.send({ "text": Help.getHelp() });
         return;
     }
 
@@ -47,18 +46,37 @@ router.all('/', function(req, res) {
         if (!argsv.a) {
             //only get users order
             orderController.getOrderForUser(user, function(order) {
-                res.send(order.toString());
+                if (!Util.isEmpty(order)) {
+                    res.send({ 'text': order.toString() });
+                } else {
+                    res.send({ 'text': 'No order found for user ' + user });
+                }
             });
         } else {
             //get all orders
             orderController.getTodaysOrders(function(orders) {
-                res.send(JSON.stringify(orders));
+                var result = "";
+                var totals = {};
+                for (var order of orders) {
+                    result += order.toString() + '\n';
+                    if (isNaN(totals[order.main])) {
+                        totals[order.main] = 1;
+                    } else {
+                        totals[order.main]++;
+                    }
+                }
+
+                for (var key in totals) {
+                    result += key + ': ' + totals[key] + '\n';
+                }
+
+                res.send({ "text": result });
             });
         }
     } else {
         console.log('unknown command');
-        var help = new Help();
-        res.send({ "text": help.getHelp() });
+        //var help = new Help();
+        res.send({ "text": Help.getHelp() });
     }
 });
 

@@ -2,6 +2,9 @@ var pg = require('pg');
 var request = require('request');
 
 function World() {
+    
+    this.helpText = '*placeorder*: Places an order\n*Usage*: placeorder -m \"main dish\" -d \"drink\" --so \"side order\" -s \"sauce\" -e \"extra\"\n*Example*: placeorder -m \"BBQ\" --so \"Pommes\" -d \"Pepsi\" -s \"Aioli\" -e \"Ingen lök\"\nAny values not supplied will be default according to:\n-m = \"BBQ\" -d = \"Pepsi\" -s \"Aioli\" --so \"Pommes\"\nIf you wish to change your order, just place a new one.\n\n*getorder*: Gets your order\n*Usage*: getorder\n\n*cancelorder*: Cancels your order\n*Usage*: cancelorder';
+    
     this.slackRequest = {
         token: 'testing123',
         team_id: 'T0001',
@@ -24,7 +27,7 @@ function World() {
         var sideorders = ['Pommes', 'Wedges'];
         var sauces = ['Aioli', 'Bea'];
         var drinks = ['Pepsi', 'Pepsi Max', 'Zingo', 'Zingo Exotic'];
-        var extra = ['Ingen lök', 'Ingen tomat', 'Ketchup', 'Extra lök'];
+        var extra = ['Ingen lök', 'Ingen tomat', 'Ketchup', 'Extra lök', ''];
 
         var o = {
             main: this.getRandomFromArray(mains),
@@ -76,6 +79,21 @@ function World() {
                 });
         });
     };
+
+    this.sendEmptyRequest = function(callback) {
+        var data = this.slackRequest;
+        request.post(
+            'http://localhost:3000',
+            { form: data },
+            function(error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    callback(body);
+                } else {
+                    throw error;
+                }
+            }
+        );
+    }
 
     this.getOrderForUser = function(user, callback) {
         this.slackRequest.text = 'getorder';
@@ -146,10 +164,10 @@ function World() {
         )
     }
 
-    this.compareToLastOrderForUser = function(user, o, callback) {
-        if (o.main == this.lastOrder[user].main && o.sideorder == this.lastOrder[user].sideorder &&
-            o.sauce == this.lastOrder[user].sauce && o.drink == this.lastOrder[user].drink &&
-            o.extra == this.lastOrder[user].extra) {
+    this.compareToLastOrderForUser = function(user, res, callback) {
+        this.lastOrder[user].user = user;
+        var expected = this.convertOrderToString(this.lastOrder[user]);
+        if(expected == res){
             callback(true);
         } else {
             callback(false);
@@ -163,6 +181,12 @@ function World() {
             }
         }
         return true;
+    }
+    
+    this.convertOrderToString = function(o)
+    {
+        var res = "*" + o.user + "* " + o.main + " " + o.sideorder + " " + o.sauce + " " + o.drink  + " " + (o.extra == null ? "" : o.extra);
+        return res;
     }
 }
 

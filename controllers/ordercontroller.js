@@ -16,7 +16,6 @@ OrderController.prototype.saveOrder = function(order, callback) {
             })
             .on('error', function(error) {
                 done();
-                console.log(error);
                 throw error;
             });
     });

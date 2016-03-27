@@ -4,12 +4,12 @@ var async = require('async');
 
 module.exports = function() {
     /* ----------------------------- GIVEN ---------------------------- */
-    
-    this.Given(/^I have an invalid slack token$/, function(callback){
+
+    this.Given(/^I have an invalid slack token$/, function(callback) {
         this.slackRequest.token = 'invalid_token';
         callback();
     });
-    
+
     /* ----------------------------- WHEN ----------------------------- */
     this.When(/^I order lunch without parameters$/, function(callback) {
         var user = 'Steve';
@@ -82,12 +82,20 @@ module.exports = function() {
             callback();
         });
     });
-    
-    this.When(/^I wait for (\d+) seconds$/, function(seconds, callback){
-       setTimeout(function(){
-           callback();
-       }, parseInt(seconds) * 1000); 
+
+    this.When(/^I wait for (\d+) seconds$/, function(seconds, callback) {
+        setTimeout(function() {
+            callback();
+        }, parseInt(seconds) * 1000);
     });
+
+    this.When(/^I use an invalid command$/, function(callback) {
+        var world = this;
+        this.sendEmptyRequest(function(res) {
+            world.lastResponse = JSON.parse(res);
+            callback();
+        });
+    })
 
     /* ----------------------------- THEN ----------------------------- */
 
@@ -96,8 +104,8 @@ module.exports = function() {
         var lastOrder = this.lastOrder[user];
         var world = this;
         this.getOrderForUser(user, function(res) {
-            var o = JSON.parse(res);
-            world.compareToLastOrderForUser(user, o, function(equal) {
+            oRes = JSON.parse(res).text;
+            world.compareToLastOrderForUser(user, oRes, function(equal) {
                 assert(equal);
                 callback();
             });
@@ -106,13 +114,21 @@ module.exports = function() {
 
     this.Then(/^I should get default values$/, function(callback) {
         var user = 'Steve';
+
+        var o = {
+            user: user,
+            main: 'BBQ',
+            sideorder: 'Pommes',
+            sauce: 'Aioli',
+            drink: 'Pepsi',
+            extra: null
+        };
+
+        var expected = this.convertOrderToString(o);
+
         this.getOrderForUser(user, function(res) {
-            var o = JSON.parse(res);
-            assert.equal(o.main, 'BBQ');
-            assert.equal(o.sideorder, 'Pommes');
-            assert.equal(o.sauce, 'Aioli');
-            assert.equal(o.drink, 'Pepsi');
-            assert.equal(o.extra, null);
+            var actual = JSON.parse(res).text;
+            assert.equal(expected, actual);
             callback();
         });
     });
@@ -120,29 +136,47 @@ module.exports = function() {
     this.Then(/^I should see all orders$/, function(callback) {
         var world = this;
         this.getAllOrders(function(body) {
-            var orders = JSON.parse(body);
-            async.each(orders, function(order, callback) {
-                world.compareToLastOrderForUser(order.user, order, function(equal) {
-                    assert(equal);
-                    callback();
-                });
-            }, function() {
-                callback();
-            });
+            var actualStr = JSON.parse(body).text;
+
+            var expectedTotals = {};
+
+            for (var key in world.lastOrder) {
+                world.lastOrder[key].user = key;
+                assert(actualStr.indexOf(world.convertOrderToString(world.lastOrder[key])) != -1);
+
+                var main = world.lastOrder[key].main;
+
+                if (isNaN(expectedTotals[main])) {
+                    expectedTotals[main] = 1;
+                } else {
+                    expectedTotals[main]++;
+                }
+            }
+
+            for (var key in expectedTotals) {
+                assert(actualStr.indexOf(key + ': ' + expectedTotals[key]) != -1);
+            }
+
+            callback();
         });
     });
 
     this.Then(/^I should not see my order$/, function(callback) {
         world = this;
         this.getOrderForUser('Steve', function(res) {
-            var o = JSON.parse(res);
-            assert(world.isEmpty(o));
+            var resStr = JSON.parse(res).text;
+            assert.equal(resStr, 'No order found for user Steve');
             callback();
         });
     });
-    
-    this.Then(/^I should get an HTTP error (\d+) back$/, function(code, callback){
+
+    this.Then(/^I should get an HTTP error (\d+) back$/, function(code, callback) {
         assert.equal(this.lastResponse.statusCode, code);
         callback();
-    })
+    });
+
+    this.Then(/^I should see the help text$/, function(callback) {
+        assert.equal(this.helpText, this.lastResponse.text);
+        callback();
+    });
 }

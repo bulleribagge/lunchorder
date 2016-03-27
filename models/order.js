@@ -15,7 +15,8 @@ class Order
     
     toString()
     {
-        return "*" + this.user + "* " + this.main + " " + this.sideorder + " " + this.sauce + " " + this.drink == null ? "" : this.extra;
+        var res = "*" + this.user + "* " + this.main + " " + this.sideorder + " " + this.sauce + " " + this.drink  + " " + (this.extra == null ? "" : this.extra);
+        return res;
     } 
 }
 

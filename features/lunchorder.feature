@@ -33,3 +33,7 @@ Feature: Order lunch
         Given I have an invalid slack token
         When I order lunch
         Then I should get an HTTP error 403 back
+        
+    Scenario: Use invalid command
+        When I use an invalid command
+        Then I should see the help text
