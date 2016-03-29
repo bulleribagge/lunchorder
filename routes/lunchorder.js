@@ -80,4 +80,24 @@ router.all('/', function(req, res) {
     }
 });
 
+router.all('/getorders', function(req, res) {
+    res.setHeader('Content-type', 'application/json');
+    var orderController = new OrderController();
+    orderController.getAllOrders(function(orders) {
+        res.send(orders);
+    });
+});
+
+router.all('/wipeorders', function(req, res) {
+    if (req.query.p == process.env.SECRET) {
+        res.setHeader('Content-type', 'application/json');
+        var orderController = new OrderController();
+        orderController.wipeAllOrders(function() {
+            res.send('Stuff wiped');
+        });
+    } else {
+        res.sendStatus(403);
+    }
+});
+
 module.exports = router

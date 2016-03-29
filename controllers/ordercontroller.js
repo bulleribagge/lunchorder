@@ -80,15 +80,44 @@ OrderController.prototype.getTodaysUsers = function(callback) {
     });
 }
 
-OrderController.prototype.cancelOrderForUser = function(user, callback){
-    pg.connect(process.env.DB_URL, function(err, client, done){
-       if(err) throw err;
-       
-       client.query('UPDATE public."order" SET canceled = TRUE WHERE "user" = $1 AND "date" >= CURRENT_DATE', [user])
-       .on('end', function(){
-           done();
-           callback();
-       });
+OrderController.prototype.getAllOrders = function(callback) {
+    pg.connect(process.env.DB_URL, function(err, client, done) {
+        if (err) throw err;
+
+        var orders = [];
+
+        client.query('SELECT * FROM public."order" WHERE "date" >= CURRENT_DATE')
+            .on('row', function(row){
+                orders.push(row);
+            })
+            .on('end', function(){
+               done();
+               callback(orders); 
+            });
+    });
+}
+
+OrderController.prototype.wipeAllOrders = function(callback) {
+    pg.connect(process.env.DB_URL, function(err, client, done) {
+        if (err) throw err;
+
+        client.query('DELETE FROM public."order" WHERE "date" >= CURRENT_DATE')
+            .on('end', function(){
+               done();
+               callback(); 
+            });
+    });
+}
+
+OrderController.prototype.cancelOrderForUser = function(user, callback) {
+    pg.connect(process.env.DB_URL, function(err, client, done) {
+        if (err) throw err;
+
+        client.query('UPDATE public."order" SET canceled = TRUE WHERE "user" = $1 AND "date" >= CURRENT_DATE', [user])
+            .on('end', function() {
+                done();
+                callback();
+            });
     });
 }
 
