@@ -2,10 +2,10 @@
 
 class Order
 {
-    constructor(user, main, sideorder, sauce, drink, extra)
+    constructor(username, main, sideorder, sauce, drink, extra)
     {
         this.date = '';
-        this.user = user;
+        this.username = username;
         this.main = main == null ? 'BBQ' : main;
         this.sideorder = sideorder == null ? 'Pommes' : sideorder;
         this.sauce = sauce == null ? 'Aioli' : sauce;
@@ -15,7 +15,7 @@ class Order
     
     toString()
     {
-        var res = "*" + this.user + "* " + this.main + " " + this.sideorder + " " + this.sauce + " " + this.drink  + " " + (this.extra == null ? "" : this.extra);
+        var res = "*" + this.username + "* " + this.main + " " + this.sideorder + " " + this.sauce + " " + this.drink  + " " + (this.extra == null ? "" : this.extra);
         return res;
     } 
 }

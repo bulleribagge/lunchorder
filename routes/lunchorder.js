@@ -23,13 +23,13 @@ router.all('/', function(req, res) {
         return;
     }
 
-    var user = req.body.user_name;
+    var username = req.body.user_name;
     var orderController = new OrderController();
     var command = argsv._;
 
     if (command == 'placeorder') {
         console.log('placeorder');
-        var order = new Order(user, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
+        var order = new Order(username, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
         orderController.saveOrder(order, function() {
             res.send('Thank you for your order!');
         }
@@ -37,7 +37,7 @@ router.all('/', function(req, res) {
     } else if (command == 'cancelorder') {
         console.log('cancelorder');
         if (!argsv.a) {
-            orderController.cancelOrderForUser(user, function() {
+            orderController.cancelOrderForUser(username, function() {
                 res.send('Your order has been canceled. Sorry you won\'t be dining with us  :(');
             });
         }
@@ -45,11 +45,11 @@ router.all('/', function(req, res) {
         console.log('getorder');
         if (!argsv.a) {
             //only get users order
-            orderController.getOrderForUser(user, function(order) {
+            orderController.getOrderForUser(username, function(order) {
                 if (!Util.isEmpty(order)) {
                     res.send({ 'text': order.toString() });
                 } else {
-                    res.send({ 'text': 'No order found for user ' + user });
+                    res.send({ 'text': 'No order found for username ' + username });
                 }
             });
         } else {
@@ -59,6 +59,7 @@ router.all('/', function(req, res) {
                 var totals = {};
                 for (var order of orders) {
                     result += order.toString() + '\n';
+                    
                     if (isNaN(totals[order.main])) {
                         totals[order.main] = 1;
                     } else {
@@ -75,7 +76,6 @@ router.all('/', function(req, res) {
         }
     } else {
         console.log('unknown command');
-        //var help = new Help();
         res.send({ "text": Help.getHelp() });
     }
 });

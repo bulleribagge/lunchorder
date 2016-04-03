@@ -45,26 +45,26 @@ function World() {
         return arr[n];
     }
 
-    this.buildOrderTextForUser = function(user) {
+    this.buildOrderTextForUser = function(username) {
         var ot = 'placeorder';
-        if (this.lastOrder[user].main && this.lastOrder[user].main != '') {
-            ot += ' -m "' + this.lastOrder[user].main + '"';
+        if (this.lastOrder[username].main && this.lastOrder[username].main != '') {
+            ot += ' -m "' + this.lastOrder[username].main + '"';
         }
 
-        if (this.lastOrder[user].sideorder && this.lastOrder[user].sideorder != '') {
-            ot += ' --so "' + this.lastOrder[user].sideorder + '"';
+        if (this.lastOrder[username].sideorder && this.lastOrder[username].sideorder != '') {
+            ot += ' --so "' + this.lastOrder[username].sideorder + '"';
         }
 
-        if (this.lastOrder[user].sauce && this.lastOrder[user].sauce != '') {
-            ot += ' -s "' + this.lastOrder[user].sauce + '"';
+        if (this.lastOrder[username].sauce && this.lastOrder[username].sauce != '') {
+            ot += ' -s "' + this.lastOrder[username].sauce + '"';
         }
 
-        if (this.lastOrder[user].drink && this.lastOrder[user].drink != '') {
-            ot += ' -d "' + this.lastOrder[user].drink + '"';
+        if (this.lastOrder[username].drink && this.lastOrder[username].drink != '') {
+            ot += ' -d "' + this.lastOrder[username].drink + '"';
         }
 
-        if (this.lastOrder[user].extra && this.lastOrder[user].extra != '') {
-            ot += ' -e "' + this.lastOrder[user].extra + '"';
+        if (this.lastOrder[username].extra && this.lastOrder[username].extra != '') {
+            ot += ' -e "' + this.lastOrder[username].extra + '"';
         }
 
         return ot;
@@ -95,10 +95,10 @@ function World() {
         );
     }
 
-    this.getOrderForUser = function(user, callback) {
+    this.getOrderForUser = function(username, callback) {
         this.slackRequest.text = 'getorder';
         var data = this.slackRequest;
-        this.slackRequest.user_name = user;
+        this.slackRequest.user_name = username;
         request.post(
             'http://localhost:3000',
             { form: data },
@@ -112,12 +112,12 @@ function World() {
         );
     };
 
-    this.placeOrderForUser = function(user, callback) {
+    this.placeOrderForUser = function(username, callback) {
         _this = this;
         this.slackRequest.text = 'placeorder';
-        this.slackRequest.text = this.buildOrderTextForUser(user);
+        this.slackRequest.text = this.buildOrderTextForUser(username);
         var data = this.slackRequest;
-        this.slackRequest.user_name = user;
+        this.slackRequest.user_name = username;
         request.post(
             'http://localhost:3000',
             { form: data },
@@ -148,7 +148,7 @@ function World() {
         )
     }
 
-    this.cancelOrderForUser = function(user, callback) {
+    this.cancelOrderForUser = function(username, callback) {
         this.slackRequest.text = 'cancelorder';
         var data = this.slackRequest;
         request.post(
@@ -164,9 +164,9 @@ function World() {
         )
     }
 
-    this.compareToLastOrderForUser = function(user, res, callback) {
-        this.lastOrder[user].user = user;
-        var expected = this.convertOrderToString(this.lastOrder[user]);
+    this.compareToLastOrderForUser = function(username, res, callback) {
+        this.lastOrder[username].username = username;
+        var expected = this.convertOrderToString(this.lastOrder[username]);
         if(expected == res){
             callback(true);
         } else {
@@ -185,7 +185,7 @@ function World() {
     
     this.convertOrderToString = function(o)
     {
-        var res = "*" + o.user + "* " + o.main + " " + o.sideorder + " " + o.sauce + " " + o.drink  + " " + (o.extra == null ? "" : o.extra);
+        var res = "*" + o.username + "* " + o.main + " " + o.sideorder + " " + o.sauce + " " + o.drink  + " " + (o.extra == null ? "" : o.extra);
         return res;
     }
 }

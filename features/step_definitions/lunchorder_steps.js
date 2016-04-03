@@ -12,16 +12,16 @@ module.exports = function() {
 
     /* ----------------------------- WHEN ----------------------------- */
     this.When(/^I order lunch without parameters$/, function(callback) {
-        var user = 'Steve';
-        this.lastOrder[user] = {};
-        this.placeOrderForUser(user, function(res) {
+        var username = 'Steve';
+        this.lastOrder[username] = {};
+        this.placeOrderForUser(username, function(res) {
             callback();
         });
     });
 
     this.When(/^I order lunch$/, function(callback) {
-        var user = 'Steve';
-        var lastOrder = this.lastOrder[user] = {
+        var username = 'Steve';
+        var lastOrder = this.lastOrder[username] = {
             main: 'Cheese',
             sideorder: 'Wedges',
             sauce: 'Bea',
@@ -29,15 +29,15 @@ module.exports = function() {
             extra: 'Extra lök'
         }
 
-        this.placeOrderForUser(user, function(res) {
+        this.placeOrderForUser(username, function(res) {
             callback();
         });
     });
 
     this.When(/^I order lunch twice$/, function(callback) {
-        var user = 'Steve';
+        var username = 'Steve';
         var world = this;
-        this.lastOrder[user] = {
+        this.lastOrder[username] = {
             main: 'Cheese',
             sideorder: 'Wedges',
             sauce: 'Bea',
@@ -45,9 +45,9 @@ module.exports = function() {
             extra: 'Extra lök'
         }
 
-        this.placeOrderForUser(user, function() {
-            world.lastOrder[user].drink = 'Pepsi';
-            world.placeOrderForUser(user, function(res) {
+        this.placeOrderForUser(username, function() {
+            world.lastOrder[username].drink = 'Pepsi';
+            world.placeOrderForUser(username, function(res) {
                 callback();
             });
         });
@@ -55,14 +55,14 @@ module.exports = function() {
 
     this.When(/^many people have ordered$/, function(callback) {
         var world = this;
-        var users = ['Steve', 'Billy', 'Dan', 'Jessica', 'Gorbatchov', 'Putin'];
-        for (var u of users) {
+        var usernames = ['Steve', 'Billy', 'Dan', 'Jessica', 'Gorbatchov', 'Putin'];
+        for (var u of usernames) {
             var o = this.getRandomOrder();
             this.lastOrder[u] = o;
         }
 
-        async.each(users, function(user, callback) {
-            world.placeOrderForUser(user, function(res) {
+        async.each(usernames, function(username, callback) {
+            world.placeOrderForUser(username, function(res) {
                 callback();
             });
         }, function(err) {
@@ -100,12 +100,12 @@ module.exports = function() {
     /* ----------------------------- THEN ----------------------------- */
 
     this.Then(/^I should see my order$/, function(callback) {
-        var user = 'Steve';
-        var lastOrder = this.lastOrder[user];
+        var username = 'Steve';
+        var lastOrder = this.lastOrder[username];
         var world = this;
-        this.getOrderForUser(user, function(res) {
+        this.getOrderForUser(username, function(res) {
             oRes = JSON.parse(res).text;
-            world.compareToLastOrderForUser(user, oRes, function(equal) {
+            world.compareToLastOrderForUser(username, oRes, function(equal) {
                 assert(equal);
                 callback();
             });
@@ -113,10 +113,10 @@ module.exports = function() {
     });
 
     this.Then(/^I should get default values$/, function(callback) {
-        var user = 'Steve';
+        var username = 'Steve';
 
         var o = {
-            user: user,
+            username: username,
             main: 'BBQ',
             sideorder: 'Pommes',
             sauce: 'Aioli',
@@ -126,7 +126,7 @@ module.exports = function() {
 
         var expected = this.convertOrderToString(o);
 
-        this.getOrderForUser(user, function(res) {
+        this.getOrderForUser(username, function(res) {
             var actual = JSON.parse(res).text;
             assert.equal(expected, actual);
             callback();
@@ -141,7 +141,7 @@ module.exports = function() {
             var expectedTotals = {};
 
             for (var key in world.lastOrder) {
-                world.lastOrder[key].user = key;
+                world.lastOrder[key].username = key;
                 assert(actualStr.indexOf(world.convertOrderToString(world.lastOrder[key])) != -1);
 
                 var main = world.lastOrder[key].main;
@@ -165,7 +165,7 @@ module.exports = function() {
         world = this;
         this.getOrderForUser('Steve', function(res) {
             var resStr = JSON.parse(res).text;
-            assert.equal(resStr, 'No order found for user Steve');
+            assert.equal(resStr, 'No order found for username Steve');
             callback();
         });
     });

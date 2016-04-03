@@ -8,8 +8,8 @@ OrderController.prototype.saveOrder = function(order, callback) {
     pg.connect(process.env.DB_URL, function(err, client, done) {
         if (err) throw err;
 
-        client.query('INSERT INTO public."order"(date, "user", main, side, sauce, drink, extra) VALUES (LOCALTIMESTAMP(0), $1, $2, $3, $4, $5, $6);',
-            [order.user, order.main, order.sideorder, order.sauce, order.drink, order.extra])
+        client.query('INSERT INTO public."order"(date, username, main, side, sauce, drink, extra) VALUES (LOCALTIMESTAMP(0), $1, $2, $3, $4, $5, $6);',
+            [order.username, order.main, order.sideorder, order.sauce, order.drink, order.extra])
             .on('end', function() {
                 done();
                 callback(true);
@@ -21,16 +21,17 @@ OrderController.prototype.saveOrder = function(order, callback) {
     });
 }
 
-OrderController.prototype.getOrderForUser = function(user, callback) {
+OrderController.prototype.getOrderForUser = function(username, callback) {
     pg.connect(process.env.DB_URL, function(err, client, done) {
         if (err) throw err;
 
         var order = {};
-
-        client.query('SELECT "user", date, main, side, sauce, drink, extra FROM public."order" WHERE "user" = $1 AND canceled = FALSE ORDER BY id DESC LIMIT 1', [user])
+        console.log(username);
+        client.query('SELECT username, date, main, side, sauce, drink, extra FROM public."order" WHERE username = $1 AND canceled = FALSE ORDER BY id DESC LIMIT 1', [username])
             .on('row', function(row) {
+                console.log(row);
                 order = new Order();
-                order.user = row.user;
+                order.username = row.username;
                 order.date = row.date;
                 order.main = row.main;
                 order.sideorder = row.side;
@@ -69,9 +70,9 @@ OrderController.prototype.getTodaysUsers = function(callback) {
 
         var users = [];
 
-        client.query('SELECT DISTINCT "user" FROM public."order" WHERE "date" >= CURRENT_DATE AND canceled = FALSE')
+        client.query('SELECT DISTINCT username FROM public."order" WHERE "date" >= CURRENT_DATE AND canceled = FALSE')
             .on('row', function(row) {
-                users.push(row.user);
+                users.push(row.username);
             })
             .on('end', function() {
                 done();
@@ -113,7 +114,7 @@ OrderController.prototype.cancelOrderForUser = function(user, callback) {
     pg.connect(process.env.DB_URL, function(err, client, done) {
         if (err) throw err;
 
-        client.query('UPDATE public."order" SET canceled = TRUE WHERE "user" = $1 AND "date" >= CURRENT_DATE', [user])
+        client.query('UPDATE public."order" SET canceled = TRUE WHERE username = $1 AND "date" >= CURRENT_DATE', [user])
             .on('end', function() {
                 done();
                 callback();
