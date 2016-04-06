@@ -27,7 +27,7 @@ function World() {
         var sideorders = ['Pommes', 'Wedges'];
         var sauces = ['Aioli', 'Bea'];
         var drinks = ['Pepsi', 'Pepsi Max', 'Zingo', 'Zingo Exotic'];
-        var extra = ['Ingen lök', 'Ingen tomat', 'Ketchup', 'Extra lök', ''];
+        var extra = ['Ingen lök', 'Ingen tomat', 'Ketchup', 'Extra lök'];
 
         var o = {
             main: this.getRandomFromArray(mains),
@@ -43,7 +43,7 @@ function World() {
     this.getRandomFromArray = function(arr) {
         var n = Math.floor(Math.random() * arr.length);
         return arr[n];
-    }
+    };
 
     this.buildOrderTextForUser = function(username) {
         var ot = 'placeorder';
@@ -68,12 +68,12 @@ function World() {
         }
 
         return ot;
-    }
+    };
 
     this.wipedb = function(callback) {
         pg.connect(process.env.DB_URL, function(err, client) {
             if (err) throw err;
-            client.query('DELETE FROM public."order";')
+            client.query('DELETE FROM public."orders";')
                 .on('end', function() {
                     callback();
                 });
@@ -93,7 +93,7 @@ function World() {
                 }
             }
         );
-    }
+    };
 
     this.getOrderForUser = function(username, callback) {
         this.slackRequest.text = 'getorder';
@@ -130,7 +130,7 @@ function World() {
                 }
             }
         );
-    }
+    };
 
     this.getAllOrders = function(callback) {
         this.slackRequest.text = 'getorder -a';
@@ -145,8 +145,8 @@ function World() {
                     throw error;
                 }
             }
-        )
-    }
+        );
+    };
 
     this.cancelOrderForUser = function(username, callback) {
         this.slackRequest.text = 'cancelorder';
@@ -161,8 +161,8 @@ function World() {
                     throw error;
                 }
             }
-        )
-    }
+        );
+    };
 
     this.compareToLastOrderForUser = function(username, res, callback) {
         this.lastOrder[username].username = username;
@@ -172,7 +172,7 @@ function World() {
         } else {
             callback(false);
         }
-    }
+    };
 
     this.isEmpty = function(o) {
         for (var i in o) {
@@ -181,13 +181,13 @@ function World() {
             }
         }
         return true;
-    }
+    };
     
     this.convertOrderToString = function(o)
     {
         var res = "*" + o.username + "* " + o.main + " " + o.sideorder + " " + o.sauce + " " + o.drink  + " " + (o.extra == null ? "" : o.extra);
         return res;
-    }
+    };
 }
 
 module.exports = function() {

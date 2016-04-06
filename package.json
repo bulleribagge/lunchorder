@@ -21,6 +21,7 @@
     "body-parser": "*",
     "express": "*",
     "pg": "*",
+    "pg-hstore": "^2.3.2",
     "request": "^2.69.0",
     "sequelize": "^3.20.0",
     "yargs": "^4.3.2"

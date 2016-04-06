@@ -10,7 +10,7 @@ Feature: Order lunch
     Scenario: Order lunch without parameters
         When I order lunch without parameters
         Then I should get default values
-        
+    
     Scenario: Order lunch twice
         When I order lunch twice
         Then I should see my order
@@ -18,7 +18,7 @@ Feature: Order lunch
     Scenario: Get all orders
         When many people have ordered
         Then I should see all orders
-        
+    
     Scenario: Cancel order
         When I order lunch
         And I cancel it

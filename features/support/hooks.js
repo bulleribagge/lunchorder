@@ -5,6 +5,6 @@ var myHooks = function (){
         this.lastOrder = []; 
         this.wipedb(callback);
     });
-}
+};
 
 module.exports = myHooks;

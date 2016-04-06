@@ -9,6 +9,8 @@ var OrderController = require('../controllers/ordercontroller');
 
 router.all('/', function(req, res) {
 
+    var argsv;
+
     if (req.body.token != process.env.SLACK_TOKEN) {
         res.sendStatus(403);
         return;
@@ -17,7 +19,7 @@ router.all('/', function(req, res) {
     res.setHeader('Content-type', 'application/json');
 
     try {
-        var argsv = yargs.parse(req.body.text);
+        argsv = yargs.parse(req.body.text);
     } catch (e) {
         res.send({ "text": Help.getHelp() });
         return;
@@ -28,12 +30,24 @@ router.all('/', function(req, res) {
     var command = argsv._;
 
     if (command == 'placeorder') {
+        var newOrder = new Order(username, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
         console.log('placeorder');
-        var order = new Order(username, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
-        orderController.saveOrder(order, function() {
-            res.send('Thank you for your order!');
-        }
-        );
+
+        //is there already an order for this user?
+        orderController.getOrderForUser(username, function(order) {
+            if (order) {
+                //update
+                orderController.updateOrder(order.id, newOrder, function() {
+                    res.send('Your order has been updated');
+                });
+            } else {
+                //insert
+                orderController.createOrder(newOrder, function() {
+                    res.send('Thank you for your order!');
+                }
+                );
+            }
+        });
     } else if (command == 'cancelorder') {
         console.log('cancelorder');
         if (!argsv.a) {
@@ -42,9 +56,9 @@ router.all('/', function(req, res) {
             });
         }
     } else if (command == 'getorder') {
-        console.log('getorder');
         if (!argsv.a) {
             //only get users order
+            console.log('getorder');
             orderController.getOrderForUser(username, function(order) {
                 if (!Util.isEmpty(order)) {
                     res.send({ 'text': order.toString() });
@@ -54,12 +68,13 @@ router.all('/', function(req, res) {
             });
         } else {
             //get all orders
+            console.log('getorder -a');
             orderController.getTodaysOrders(function(orders) {
                 var result = "";
                 var totals = {};
                 for (var order of orders) {
                     result += order.toString() + '\n';
-                    
+
                     if (isNaN(totals[order.main])) {
                         totals[order.main] = 1;
                     } else {
@@ -100,4 +115,4 @@ router.all('/wipeorders', function(req, res) {
     }
 });
 
-module.exports = router
+module.exports = router;

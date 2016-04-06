@@ -43,7 +43,7 @@ module.exports = function() {
             sauce: 'Bea',
             drink: 'Pepsi Max',
             extra: 'Extra lök'
-        }
+        };
 
         this.placeOrderForUser(username, function() {
             world.lastOrder[username].drink = 'Pepsi';
@@ -95,7 +95,7 @@ module.exports = function() {
             world.lastResponse = JSON.parse(res);
             callback();
         });
-    })
+    });
 
     /* ----------------------------- THEN ----------------------------- */
 
@@ -137,7 +137,6 @@ module.exports = function() {
         var world = this;
         this.getAllOrders(function(body) {
             var actualStr = JSON.parse(body).text;
-
             var expectedTotals = {};
 
             for (var key in world.lastOrder) {

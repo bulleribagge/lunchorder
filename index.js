@@ -3,7 +3,9 @@ var pg = require('pg');
 var bodyParser = require('body-parser');
 var app = express();
 var port = 3000;
-var routes = require('./routes/lunchorder')
+var routes = require('./routes/lunchorder');
+var Sequelize = require('sequelize');
+var Model = require('./model');
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -11,5 +13,7 @@ app.use(bodyParser.urlencoded({
 
 app.use('/', routes);
 
-app.listen(process.env.PORT || port);
-console.log('listening on port ' + port + ' ...');
+Model.create(function(){
+    app.listen(process.env.PORT || port);
+    console.log('listening on port ' + port + ' ...');        
+});
