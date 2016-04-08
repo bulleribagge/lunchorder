@@ -6,8 +6,30 @@ Model.Order = {};
 
 Model.create = function(callback) {
     
-    var sequelize = new Sequelize(process.env.DB_URL, {
+    var sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
+        host: process.env.DB_HOST,
+        dialect: process.env.DB_ENGINE,
+        port: process.env.DB_PORT,
         timezone:'+02:00'
+    });
+    
+    this.Restaurant = sequelize.define('restaurant', {
+       id: {
+           type: Sequelize.INTEGER,
+           autoIncrement: true,
+           primaryKey: true
+       },
+       name: Sequelize.STRING(150)
+    });
+    
+    this.Item = sequelize.define('item', {
+        id: {
+           type: Sequelize.INTEGER,
+           autoIncrement: true,
+           primaryKey: true
+       },
+       name: Sequelize.STRING(50),
+       type: Sequelize.STRING(50)
     });
     
     this.Order = sequelize.define('order', {
@@ -32,10 +54,12 @@ Model.create = function(callback) {
         }
     });
     
+    this.Order.belongsTo(this.Restaurant);
+    
     sequelize.sync().then(function(){
         callback();
     }).catch(function(error){
-        throw 'Ooops, something went wrong when syncing';
+        throw 'Ooops, something went wrong when syncing: ' + error;
     });
 };
 

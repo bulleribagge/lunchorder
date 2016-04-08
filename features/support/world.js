@@ -1,5 +1,7 @@
 var pg = require('pg');
 var request = require('request');
+var Connection = require('tedious').Connection;
+var Request = require('tedious').Request;
 
 function World() {
     
@@ -71,13 +73,43 @@ function World() {
     };
 
     this.wipedb = function(callback) {
-        pg.connect(process.env.DB_URL, function(err, client) {
-            if (err) throw err;
-            client.query('DELETE FROM public."orders";')
-                .on('end', function() {
-                    callback();
+        if(process.env.DB_ENGINE == 'mssql')
+        {
+            var con = new Connection({
+                userName: process.env.DB_USER,
+                password: process.env.DB_PASS,
+                server: process.env.DB_HOST,
+                options: {
+                    database: process.env.DB_NAME
+                }
+            });
+            
+            con.on('connect', function(err){
+                query = new Request("DELETE FROM orders;", function(err, rowCount){
+                   if(err)
+                   {
+                       console.log('derp err' + err);
+                       throw err;
+                   }else{
+                       console.log('derp rows' + rowCount);
+                       callback();
+                   }
                 });
-        });
+                
+                con.execSql(query);
+            });
+            
+            
+        }else if(process.env.DB_ENGINE == 'postgre')
+        {
+            pg.connect(process.env.DB_URL2, function(err, client) {
+                if (err) throw err;
+                client.query('DELETE FROM public."orders";')
+                    .on('end', function() {
+                        callback();
+                    });
+            });
+        }
     };
 
     this.sendEmptyRequest = function(callback) {

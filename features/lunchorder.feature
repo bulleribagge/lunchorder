@@ -7,6 +7,7 @@ Feature: Order lunch
         When I order lunch
         Then I should see my order
         
+    @wip
     Scenario: Order lunch without parameters
         When I order lunch without parameters
         Then I should get default values
