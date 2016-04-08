@@ -24,8 +24,13 @@
     "pg-hstore": "^2.3.2",
     "request": "^2.69.0",
     "sequelize": "^3.20.0",
+<<<<<<< HEAD
     "tedious": "^1.13.2",
     "yargs": "^4.3.2"
+=======
+    "yargs": "^4.3.2",
+    "cors": "^2.7.1"
+>>>>>>> f64f0efe27480079088ebd9368d5535404ddd2f8
   },
   "devDependencies": {
     "async": "^1.5.2"

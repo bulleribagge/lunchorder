@@ -6,6 +6,9 @@ var port = 3000;
 var routes = require('./routes/lunchorder');
 var Sequelize = require('sequelize');
 var Model = require('./model');
+var cors = require('cors');
+
+app.use(cors());
 
 app.use(bodyParser.urlencoded({
     extended: true

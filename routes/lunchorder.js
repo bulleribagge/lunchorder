@@ -8,7 +8,7 @@ var Util = require('../util');
 var OrderController = require('../controllers/ordercontroller');
 
 router.all('/', function(req, res) {
-
+    
     var argsv;
 
     if (req.body.token != process.env.SLACK_TOKEN) {
@@ -98,7 +98,7 @@ router.all('/', function(req, res) {
 router.all('/getorders', function(req, res) {
     res.setHeader('Content-type', 'application/json');
     var orderController = new OrderController();
-    orderController.getAllOrders(function(orders) {
+    orderController.getTodaysOrders(function(orders) {
         res.send(orders);
     });
 });
