@@ -98,7 +98,7 @@ router.all('/', function(req, res) {
 router.all('/getorders', function(req, res) {
     res.setHeader('Content-type', 'application/json');
     var orderController = new OrderController();
-    orderController.getAllOrders(function(orders) {
+    orderController.getTodaysOrders(function(orders) {
         res.send(orders);
     });
 });
