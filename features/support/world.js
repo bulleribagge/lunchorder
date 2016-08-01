@@ -25,13 +25,15 @@ function World() {
     this.lastOrder = [];
 
     this.getRandomOrder = function() {
-        var mains = ['BBQ', 'Cheese', 'Vegetarian', 'Chicken', 'Mexican', 'Oskar'];
+        var restaurants = ['lillaoskar', 'newyork'];
+        var mains = ['bbq', 'cheese', 'vegetarian', 'chicken', 'mexican', 'oskar'];
         var sideorders = ['Pommes', 'Wedges'];
         var sauces = ['Aioli', 'Bea'];
         var drinks = ['Pepsi', 'Pepsi Max', 'Zingo', 'Zingo Exotic'];
         var extra = ['Ingen lök', 'Ingen tomat', 'Ketchup', 'Extra lök'];
 
         var o = {
+            restaurant: this.getRandomFromArray(restaurants),
             main: this.getRandomFromArray(mains),
             sideorder: this.getRandomFromArray(sideorders),
             sauce: this.getRandomFromArray(sauces),
@@ -49,23 +51,28 @@ function World() {
 
     this.buildOrderTextForUser = function(username) {
         var ot = 'placeorder';
-        if (this.lastOrder[username].main && this.lastOrder[username].main != '') {
+        
+        if(this.lastOrder[username].restaurant && this.lastOrder[username].restaurant !== ''){
+            ot += ' -r "' + this.lastOrder[username].restaurant + '"';
+        }
+        
+        if (this.lastOrder[username].main && this.lastOrder[username].main !== '') {
             ot += ' -m "' + this.lastOrder[username].main + '"';
         }
 
-        if (this.lastOrder[username].sideorder && this.lastOrder[username].sideorder != '') {
+        if (this.lastOrder[username].sideorder && this.lastOrder[username].sideorder !== '') {
             ot += ' --so "' + this.lastOrder[username].sideorder + '"';
         }
 
-        if (this.lastOrder[username].sauce && this.lastOrder[username].sauce != '') {
+        if (this.lastOrder[username].sauce && this.lastOrder[username].sauce !== '') {
             ot += ' -s "' + this.lastOrder[username].sauce + '"';
         }
 
-        if (this.lastOrder[username].drink && this.lastOrder[username].drink != '') {
+        if (this.lastOrder[username].drink && this.lastOrder[username].drink !== '') {
             ot += ' -d "' + this.lastOrder[username].drink + '"';
         }
 
-        if (this.lastOrder[username].extra && this.lastOrder[username].extra != '') {
+        if (this.lastOrder[username].extra && this.lastOrder[username].extra !== '') {
             ot += ' -e "' + this.lastOrder[username].extra + '"';
         }
 
@@ -88,18 +95,14 @@ function World() {
                 query = new Request("DELETE FROM orders;", function(err, rowCount){
                    if(err)
                    {
-                       console.log('derp err' + err);
                        throw err;
                    }else{
-                       console.log('derp rows' + rowCount);
                        callback();
                    }
                 });
                 
                 con.execSql(query);
             });
-            
-            
         }else if(process.env.DB_ENGINE == 'postgre')
         {
             pg.connect(process.env.DB_URL2, function(err, client) {
@@ -138,7 +141,7 @@ function World() {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
-                    throw error;
+                    throw 'Something went wrong';
                 }
             }
         );
@@ -150,9 +153,8 @@ function World() {
         this.slackRequest.text = this.buildOrderTextForUser(username);
         var data = this.slackRequest;
         this.slackRequest.user_name = username;
-        request.post(
-            'http://localhost:3000',
-            { form: data },
+
+        request.post('http://localhost:3000', { form: data },
             function(error, response, body) {
                 if (!error && response.statusCode == 200) {
                     callback(body);
@@ -164,8 +166,8 @@ function World() {
         );
     };
 
-    this.getAllOrders = function(callback) {
-        this.slackRequest.text = 'getorder -a';
+    this.getAllOrders = function(restaurant, callback) {
+        this.slackRequest.text = 'getorder -a -r ' + restaurant;
         var data = this.slackRequest;
         request.post(
             'http://localhost:3000',
@@ -174,7 +176,7 @@ function World() {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
-                    throw error;
+                    throw 'Something went wrong!';
                 }
             }
         );
@@ -190,7 +192,7 @@ function World() {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
-                    throw error;
+                    throw 'Something went wrong';
                 }
             }
         );
@@ -202,6 +204,7 @@ function World() {
         if(expected == res){
             callback(true);
         } else {
+            console.log('expected: ' + expected + '\r\n' + 'actual: ' + res);
             callback(false);
         }
     };
@@ -217,7 +220,7 @@ function World() {
     
     this.convertOrderToString = function(o)
     {
-        var res = "*" + o.username + "* " + o.main + " " + o.sideorder + " " + o.sauce + " " + o.drink  + " " + (o.extra == null ? "" : o.extra);
+        var res = "*" + o.username + "* " + o.main.toLowerCase() + " " + o.sideorder + " " + o.sauce + " " + o.drink  + " " + (o.extra === null ? "" : o.extra);
         return res;
     };
 }

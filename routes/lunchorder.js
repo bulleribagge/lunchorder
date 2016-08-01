@@ -7,11 +7,12 @@ var Help = require('../help');
 var Util = require('../util');
 var OrderController = require('../controllers/ordercontroller');
 
-router.all('/', function(req, res) {
-    
+router.all('/', function (req, res) {
+
     var argsv;
 
     if (req.body.token != process.env.SLACK_TOKEN) {
+        console.log(req.body.text);
         res.sendStatus(403);
         return;
     }
@@ -19,31 +20,54 @@ router.all('/', function(req, res) {
     res.setHeader('Content-type', 'application/json');
 
     try {
+        console.log(req.body.text);
         argsv = yargs.parse(req.body.text);
     } catch (e) {
         res.send({ "text": Help.getHelp() });
         return;
     }
 
+    var restaurants = ['lillaoskar', 'newyork'];
+
     var username = req.body.user_name;
     var orderController = new OrderController();
     var command = argsv._;
 
     if (command == 'placeorder') {
-        var newOrder = new Order(username, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
-        console.log('placeorder');
+        if(!argsv.r)
+        {
+            var str = 'No restaurant supplied! Please specify one of the following restaurants using the -r flag: ';
+            for (var r of restaurants) {
+                str += '\r\n' + r;
+            }
+            res.send({ 'text': str });
+            return;
+        }
+        if (restaurants.indexOf(argsv.r.toLowerCase()) == -1) {
+            console.log('unknown restaurant: ' + argsv.r);
+            var str = 'Unknown restaurant! Please specify one of the following restaurants: ';
+            for (var r of restaurants) {
+                str += '\r\n' + r;
+            }
+            res.send({ 'text': str });
+            return;
+        }
 
+        var newOrder = new Order(username, argsv.r, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
+        
         //is there already an order for this user?
-        orderController.getOrderForUser(username, function(order) {
+        orderController.getOrderForUser(username, function (order) {
             if (order) {
                 //update
-                orderController.updateOrder(order.id, newOrder, function() {
-                    res.send('Your order has been updated');
+                console.log('there is already an order for this user');
+                orderController.updateOrder(order.id, newOrder, function () {
+                    res.send({ 'text': 'Your order has been updated' });
                 });
             } else {
                 //insert
-                orderController.createOrder(newOrder, function() {
-                    res.send('Thank you for your order!');
+                orderController.createOrder(newOrder, function () {
+                    console.log('order created in db');
+                    res.send({ 'text': 'Thank you for your order!' });
                 }
                 );
             }
@@ -51,15 +75,15 @@ router.all('/', function(req, res) {
     } else if (command == 'cancelorder') {
         console.log('cancelorder');
         if (!argsv.a) {
-            orderController.cancelOrderForUser(username, function() {
-                res.send('Your order has been canceled. Sorry you won\'t be dining with us  :(');
+            orderController.cancelOrderForUser(username, function () {
+                res.send({ 'text': 'Your order has been canceled. Sorry you won\'t be dining with us  :(' });
             });
         }
     } else if (command == 'getorder') {
         if (!argsv.a) {
             //only get users order
             console.log('getorder');
-            orderController.getOrderForUser(username, function(order) {
+            orderController.getOrderForUser(username, function (order) {
                 if (!Util.isEmpty(order)) {
                     res.send({ 'text': order.toString() });
                 } else {
@@ -67,27 +91,31 @@ router.all('/', function(req, res) {
                 }
             });
         } else {
-            //get all orders
-            console.log('getorder -a');
-            orderController.getTodaysOrders(function(orders) {
-                var result = "";
-                var totals = {};
-                for (var order of orders) {
-                    result += order.toString() + '\n';
+            if (argsv.r) {
+                //get all orders
+                console.log('getorder -a -r');
+                orderController.getTodaysOrdersForRestaurant(argsv.r, function (orders) {
+                    var result = "";
+                    var totals = {};
+                    for (var order of orders) {
+                        result += order.toString() + '\n';
 
-                    if (isNaN(totals[order.main])) {
-                        totals[order.main] = 1;
-                    } else {
-                        totals[order.main]++;
+                        if (isNaN(totals[order.main])) {
+                            totals[order.main] = 1;
+                        } else {
+                            totals[order.main]++;
+                        }
                     }
-                }
 
-                for (var key in totals) {
-                    result += key + ': ' + totals[key] + '\n';
-                }
+                    for (var key in totals) {
+                        result += key + ': ' + totals[key] + '\n';
+                    }
 
-                res.send({ "text": result });
-            });
+                    res.send({ "text": result });
+                });
+            }else{
+                res.send({'text': 'You need to specify a restaurant with the -r flag'});
+            }
         }
     } else {
         console.log('unknown command');
@@ -95,19 +123,19 @@ router.all('/', function(req, res) {
     }
 });
 
-router.all('/getorders', function(req, res) {
+router.all('/getorders', function (req, res) {
     res.setHeader('Content-type', 'application/json');
     var orderController = new OrderController();
-    orderController.getTodaysOrders(function(orders) {
+    orderController.getTodaysOrders(function (orders) {
         res.send(orders);
     });
 });
 
-router.all('/wipeorders', function(req, res) {
+router.all('/wipeorders', function (req, res) {
     if (req.query.p == process.env.SECRET) {
         res.setHeader('Content-type', 'application/json');
         var orderController = new OrderController();
-        orderController.wipeAllOrders(function() {
+        orderController.wipeAllOrders(function () {
             res.send('Stuff wiped');
         });
     } else {

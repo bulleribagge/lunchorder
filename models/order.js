@@ -2,9 +2,10 @@
 
 class Order
 {
-    constructor(username, main, sideorder, sauce, drink, extra)
+    constructor(username, restaurant, main, sideorder, sauce, drink, extra)
     {
         this.date = '';
+        this.restaurant = restaurant;
         this.username = username;
         this.main = main == null ? 'BBQ' : main;
         this.sideorder = sideorder == null ? 'Pommes' : sideorder;

@@ -9,20 +9,23 @@ OrderController.prototype.createOrder = function(order, callback) {
 
     Model.Order.create({
         username: order.username,
-        main: order.main,
+        restaurant: order.restaurant.toLowerCase().trim(),
+        main: order.main.toLowerCase().trim(),
         sideorder: order.sideorder,
         sauce: order.sauce,
         drink: order.drink,
         extra: order.extra,
         canceled: false
     }).then(function() {
+        console.log('order created');
         callback(true);
     });
 };
 
 OrderController.prototype.updateOrder = function(id, order, callback) {
     Model.Order.update({
-        main: order.main,
+        restaurant: order.restaurant.toLowerCase().trim(),
+        main: order.main.toLowerCase().trim(),
         sideorder: order.sideorder,
         sauce: order.sauce,
         drink: order.drink,
@@ -54,12 +57,13 @@ OrderController.prototype.getOrderForUser = function(username, callback) {
     });
 };
 
-OrderController.prototype.getTodaysOrders = function(callback) {
+OrderController.prototype.getTodaysOrdersForRestaurant = function(restaurant, callback) {
     var date = new Date();
     date.setHours(0, 0, 0, 0);
 
     Model.Order.findAll({
         where: {
+            restaurant: restaurant,
             createdAt: {
                 $gt: date
             },

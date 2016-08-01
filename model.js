@@ -10,26 +10,8 @@ Model.create = function(callback) {
         host: process.env.DB_HOST,
         dialect: process.env.DB_ENGINE,
         port: process.env.DB_PORT,
-        timezone:'+02:00'
-    });
-    
-    this.Restaurant = sequelize.define('restaurant', {
-       id: {
-           type: Sequelize.INTEGER,
-           autoIncrement: true,
-           primaryKey: true
-       },
-       name: Sequelize.STRING(150)
-    });
-    
-    this.Item = sequelize.define('item', {
-        id: {
-           type: Sequelize.INTEGER,
-           autoIncrement: true,
-           primaryKey: true
-       },
-       name: Sequelize.STRING(50),
-       type: Sequelize.STRING(50)
+        timezone:'+02:00',
+        logging: false
     });
     
     this.Order = sequelize.define('order', {
@@ -39,6 +21,7 @@ Model.create = function(callback) {
             primaryKey: true
         },
         username: Sequelize.STRING(50),
+        restaurant: Sequelize.STRING(50),
         main: Sequelize.STRING(50),
         sideorder: Sequelize.STRING(50),
         sauce: Sequelize.STRING(50),
@@ -54,7 +37,6 @@ Model.create = function(callback) {
         }
     });
     
-    this.Order.belongsTo(this.Restaurant);
     
     sequelize.sync().then(function(){
         callback();
