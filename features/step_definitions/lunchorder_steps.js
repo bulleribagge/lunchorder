@@ -11,10 +11,10 @@ module.exports = function () {
     });
 
     /* ----------------------------- WHEN ----------------------------- */
-    this.When(/^I order lunch without parameters at (.*)$/, function (restaurant, callback) {
+    this.When(/^I order lunch without parameters$/, function (callback) {
         var username = 'Steve';
         var world = this;
-        this.lastOrder[username] = { restaurant: restaurant };
+        this.lastOrder[username] = { restaurant: 'newyork' };
         this.placeOrderForUser(username, function (res) {
             world.lastResponse = JSON.parse(res);
             callback();
@@ -139,6 +139,22 @@ module.exports = function () {
         });
     });
 
+    this.When(/^I order with just the r and m flag$/, function (callback){
+        var world = this;
+        var username = "Steve";
+        var restaurant = "newyork";
+
+        this.lastOrder[username] = {
+            restaurant: restaurant,
+            main: "Kebabpizza"
+        };
+
+        this.placeOrderForUser(username, function(res){
+            world.lastResponse = JSON.parse(res);
+            callback();
+        });
+    });
+
     /* ----------------------------- THEN ----------------------------- */
 
     this.Then(/^I should see my order$/, function (callback) {
@@ -152,29 +168,6 @@ module.exports = function () {
                 assert(equal);
                 callback();
             });
-        });
-    });
-
-    this.Then(/^I should get default values$/, function (callback) {
-        var username = 'Steve';
-
-        var o = {
-            username: username,
-            restaurant: 'lillaoskar',
-            main: 'BBQ',
-            sideorder: 'Pommes',
-            sauce: 'Aioli',
-            drink: 'Pepsi',
-            extra: null
-        };
-
-        var expected = this.convertOrderToString(o);
-        var world = this;
-        this.getOrderForUser(username, function (res) {
-            world.lastResponse = JSON.parse(res);
-            var actual = JSON.parse(res).text;
-            assert.equal(expected, actual);
-            callback();
         });
     });
 
@@ -234,12 +227,25 @@ module.exports = function () {
         assert.equal(expected, this.lastResponse.text);
         callback();
     });
-
     
     this.Then(/^I should get an error message and a list of all the restaurants$/, function (callback) {
         var expected = 'No restaurant supplied! Please specify one of the following restaurants using the -r flag: ';
         expected += '\r\nlillaoskar';
         expected += '\r\nnewyork'; 
+        assert.equal(expected, this.lastResponse.text);
+        callback();
+    });
+
+    this.Then(/^I should get a warning about missing parameters$/, function(callback){
+        var expected = 'Oh no! Looks like you didn\'t specify your main dish with the -m flag. Here\'s an example: \r\n /lunchorder placeorder -r "newyork" -m "kebabpizza"';
+        assert.equal(expected, this.lastResponse.text);
+        callback();
+    });
+
+    this.Then(/^I should get the correct text in the response$/, function(callback){
+        var expected = 'Thank you for your order! Here is what you ordered: \r\n ' + this.convertOrderToString(this.lastOrder['Steve'], 'Steve');
+        var actual = this.lastResponse.text;
+
         assert.equal(expected, this.lastResponse.text);
         callback();
     });

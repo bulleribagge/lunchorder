@@ -31,7 +31,7 @@ Model.create = function(callback) {
     },{
         instanceMethods:{
             toString: function(){
-                var res = "*" + this.username + "* " + this.main + " " + this.sideorder + " " + this.sauce + " " + this.drink  + " " + (this.extra == null ? "" : this.extra);
+                var res = "*" + this.username + "* " + this.main + " " + (this.sideorder ? this.sideorder : "") + " " + (this.sauce ? this.sauce : "") + " " + (this.drink ? this.drink : "")  + " " + (this.extra ? this.extra : "");
                 return res;
             }
         }

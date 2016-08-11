@@ -54,7 +54,13 @@ router.all('/', function (req, res) {
         }
 
         var newOrder = new Order(username, argsv.r, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
-        
+
+        if(!newOrder.main)
+        {
+            res.send({'text': 'Oh no! Looks like you didn\'t specify your main dish with the -m flag. Here\'s an example: \r\n /lunchorder placeorder -r "newyork" -m "kebabpizza"'});
+            return;
+        }
+
         //is there already an order for this user?
         orderController.getOrderForUser(username, function (order) {
             if (order) {
@@ -67,9 +73,8 @@ router.all('/', function (req, res) {
                 //insert
                 orderController.createOrder(newOrder, function () {
                     console.log('order created in db');
-                    res.send({ 'text': 'Thank you for your order!' });
-                }
-                );
+                    res.send({ 'text': 'Thank you for your order! Here is what you ordered: \r\n ' + newOrder.toString() });
+                });
             }
         });
     } else if (command == 'cancelorder') {
@@ -85,6 +90,7 @@ router.all('/', function (req, res) {
             console.log('getorder');
             orderController.getOrderForUser(username, function (order) {
                 if (!Util.isEmpty(order)) {
+                    console.log(order.toString());
                     res.send({ 'text': order.toString() });
                 } else {
                     res.send({ 'text': 'No order found for username ' + username });

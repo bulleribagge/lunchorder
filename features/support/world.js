@@ -5,7 +5,20 @@ var Request = require('tedious').Request;
 
 function World() {
     
-    this.helpText = '*placeorder*: Places an order\n*Usage*: placeorder -m \"main dish\" -d \"drink\" --so \"side order\" -s \"sauce\" -e \"extra\"\n*Example*: placeorder -m \"BBQ\" --so \"Pommes\" -d \"Pepsi\" -s \"Aioli\" -e \"Ingen lök\"\nAny values not supplied will be default according to:\n-m = \"BBQ\" -d = \"Pepsi\" -s \"Aioli\" --so \"Pommes\"\nIf you wish to change your order, just place a new one.\n\n*getorder*: Gets your order\n*Usage*: getorder\n\n*cancelorder*: Cancels your order\n*Usage*: cancelorder';
+    this.helpText = `*placeorder*: Places an order
+*Usage*: /lunchorder placeorder -r "restaurant" -m "main dish" -d "drink" --so "side order" -s "sauce" -e "extra"
+*Example*: /lunchorder placeorder -r "lillaoskar" -m "BBQ" --so "Pommes" -d "Pepsi" -s "Aioli" -e "Ingen lök"
+*Example 2*: /lunchorder placeorder -r "newyork" -m "Kebabpizza" -d "Pepsi" -s "Kebabsås mild"
+
+The -r flag and the -m flag are mandatory, the rest are optional.
+
+If you wish to change your order, just place a new one.
+
+*getorder*: Gets your order
+*Usage*: /lunchorder getorder
+
+*cancelorder*: Cancels your order
+*Usage*: /lunchorder cancelorder`;
     
     this.slackRequest = {
         token: 'testing123',
@@ -218,9 +231,9 @@ function World() {
         return true;
     };
     
-    this.convertOrderToString = function(o)
+    this.convertOrderToString = function(o, username)
     {
-        var res = "*" + o.username + "* " + o.main.toLowerCase() + " " + o.sideorder + " " + o.sauce + " " + o.drink  + " " + (o.extra === null ? "" : o.extra);
+        var res = "*" + (username ? username : o.username) + "* " + o.main.toLowerCase() + " " + (o.sideorder ? o.sideorder : "") + " " + (o.sauce ? o.sauce : "") + " " + (o.drink ? o.drink : "")  + " " + (o.extra ? o.extra : "");
         return res;
     };
 }

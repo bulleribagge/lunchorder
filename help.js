@@ -1,20 +1,22 @@
 function Help() { }
 
 Help.placeOrderHelp = `*placeorder*: Places an order
-*Usage*: placeorder -m "main dish" -d "drink" --so "side order" -s "sauce" -e "extra"
-*Example*: placeorder -m "BBQ" --so "Pommes" -d "Pepsi" -s "Aioli" -e "Ingen lök"
-Any values not supplied will be default according to:
--m = "BBQ" -d = "Pepsi" -s "Aioli" --so "Pommes"
+*Usage*: /lunchorder placeorder -r "restaurant" -m "main dish" -d "drink" --so "side order" -s "sauce" -e "extra"
+*Example*: /lunchorder placeorder -r "lillaoskar" -m "BBQ" --so "Pommes" -d "Pepsi" -s "Aioli" -e "Ingen lök"
+*Example 2*: /lunchorder placeorder -r "newyork" -m "Kebabpizza" -d "Pepsi" -s "Kebabsås mild"
+
+The -r flag and the -m flag are mandatory, the rest are optional.
+
 If you wish to change your order, just place a new one.`;
                             
 Help.getOrderHelp = `*getorder*: Gets your order
-*Usage*: getorder`
+*Usage*: /lunchorder getorder`;
                             
 Help.cancelOrderHelp = `*cancelorder*: Cancels your order
-*Usage*: cancelorder`
+*Usage*: /lunchorder cancelorder`;
 
 Help.getHelp = function(){
     return this.placeOrderHelp + '\n\n' + this.getOrderHelp + '\n\n' + this.cancelOrderHelp;
-}
+};
 
 module.exports = Help;
