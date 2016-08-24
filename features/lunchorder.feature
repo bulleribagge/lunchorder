@@ -58,3 +58,9 @@ Feature: Order lunch
     Scenario: Order with just the r and m flag
         When I order with just the r and m flag
         Then I should see my order 
+
+        @wip
+    Scenario: Repeat last order
+        When I have an order at lillaoskar
+        And I order lunch with the lo flag
+        Then I should see my order

@@ -57,6 +57,24 @@ OrderController.prototype.getOrderForUser = function(username, callback) {
     });
 };
 
+OrderController.prototype.getLastOrderForUser = function(username, callback) {
+    var date = new Date();
+    date.setHours(0, 0, 0, 0);
+    
+    Model.Order.findOne({
+        order: [['createdAt', 'DESC']],
+        where: {
+            username: username,
+            canceled: false,
+            createdAt: {
+                $lt: date
+            }
+        },
+    }).then(function(order) {
+        callback(order);
+    });
+};
+
 OrderController.prototype.getTodaysOrdersForRestaurant = function(restaurant, callback) {
     var date = new Date();
     date.setHours(0, 0, 0, 0);

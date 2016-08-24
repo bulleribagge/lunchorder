@@ -2,9 +2,10 @@ var pg = require('pg');
 var request = require('request');
 var Connection = require('tedious').Connection;
 var Request = require('tedious').Request;
+var TYPES = require('tedious').TYPES;
 
 function World() {
-    
+
     this.helpText = `*placeorder*: Places an order
 *Usage*: /lunchorder placeorder -r "restaurant" -m "main dish" -d "drink" --so "side order" -s "sauce" -e "extra"
 *Example*: /lunchorder placeorder -r "lillaoskar" -m "BBQ" --so "Pommes" -d "Pepsi" -s "Aioli" -e "Ingen lök"
@@ -14,12 +15,14 @@ The -r flag and the -m flag are mandatory, the rest are optional.
 
 If you wish to change your order, just place a new one.
 
+New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't that neat?
+
 *getorder*: Gets your order
 *Usage*: /lunchorder getorder
 
 *cancelorder*: Cancels your order
 *Usage*: /lunchorder cancelorder`;
-    
+
     this.slackRequest = {
         token: 'testing123',
         team_id: 'T0001',
@@ -37,7 +40,7 @@ If you wish to change your order, just place a new one.
 
     this.lastOrder = [];
 
-    this.getRandomOrder = function() {
+    this.getRandomOrder = function () {
         var restaurants = ['lillaoskar', 'newyork'];
         var mains = ['bbq', 'cheese', 'vegetarian', 'chicken', 'mexican', 'oskar'];
         var sideorders = ['Pommes', 'Wedges'];
@@ -57,18 +60,18 @@ If you wish to change your order, just place a new one.
         return o;
     };
 
-    this.getRandomFromArray = function(arr) {
+    this.getRandomFromArray = function (arr) {
         var n = Math.floor(Math.random() * arr.length);
         return arr[n];
     };
 
-    this.buildOrderTextForUser = function(username) {
+    this.buildOrderTextForUser = function (username) {
         var ot = 'placeorder';
-        
-        if(this.lastOrder[username].restaurant && this.lastOrder[username].restaurant !== ''){
+
+        if (this.lastOrder[username].restaurant && this.lastOrder[username].restaurant !== '') {
             ot += ' -r "' + this.lastOrder[username].restaurant + '"';
         }
-        
+
         if (this.lastOrder[username].main && this.lastOrder[username].main !== '') {
             ot += ' -m "' + this.lastOrder[username].main + '"';
         }
@@ -92,9 +95,8 @@ If you wish to change your order, just place a new one.
         return ot;
     };
 
-    this.wipedb = function(callback) {
-        if(process.env.DB_ENGINE == 'mssql')
-        {
+    this.wipedb = function (callback) {
+        if (process.env.DB_ENGINE == 'mssql') {
             var con = new Connection({
                 userName: process.env.DB_USER,
                 password: process.env.DB_PASS,
@@ -103,37 +105,41 @@ If you wish to change your order, just place a new one.
                     database: process.env.DB_NAME
                 }
             });
-            
-            con.on('connect', function(err){
-                query = new Request("DELETE FROM orders;", function(err, rowCount){
-                   if(err)
-                   {
-                       throw err;
-                   }else{
-                       callback();
-                   }
+
+            con.on('connect', function (err) {
+                query = new Request("DELETE FROM orders;", function (err, rowCount) {
+                    if (err) {
+                        throw err;
+                    } else {
+                        callback();
+                    }
                 });
-                
+
                 con.execSql(query);
             });
-        }else if(process.env.DB_ENGINE == 'postgre')
-        {
-            pg.connect(process.env.DB_URL2, function(err, client) {
-                if (err) throw err;
-                client.query('DELETE FROM public."orders";')
-                    .on('end', function() {
-                        callback();
-                    });
+        } else if (process.env.DB_ENGINE == 'postgre') {
+
+            var client = new pg.Client({
+                user: process.env.DB_USER,
+                database: process.env.DB_NAME,
+                password: process.env.DB_PASS,
+                port: process.env.DB_PORT,
+                host: process.env.DB_HOST
             });
+
+            client.query('DELETE FROM public."orders";')
+                .on('end', function () {
+                    callback();
+                });
         }
     };
 
-    this.sendEmptyRequest = function(callback) {
+    this.sendEmptyRequest = function (callback) {
         var data = this.slackRequest;
         request.post(
             'http://localhost:3000',
             { form: data },
-            function(error, response, body) {
+            function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
@@ -143,14 +149,14 @@ If you wish to change your order, just place a new one.
         );
     };
 
-    this.getOrderForUser = function(username, callback) {
+    this.getOrderForUser = function (username, callback) {
         this.slackRequest.text = 'getorder';
         var data = this.slackRequest;
         this.slackRequest.user_name = username;
         request.post(
             'http://localhost:3000',
             { form: data },
-            function(error, response, body) {
+            function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
@@ -160,7 +166,7 @@ If you wish to change your order, just place a new one.
         );
     };
 
-    this.placeOrderForUser = function(username, callback) {
+    this.placeOrderForUser = function (username, callback) {
         _this = this;
         this.slackRequest.text = 'placeorder';
         this.slackRequest.text = this.buildOrderTextForUser(username);
@@ -168,7 +174,7 @@ If you wish to change your order, just place a new one.
         this.slackRequest.user_name = username;
 
         request.post('http://localhost:3000', { form: data },
-            function(error, response, body) {
+            function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
@@ -179,13 +185,31 @@ If you wish to change your order, just place a new one.
         );
     };
 
-    this.getAllOrders = function(restaurant, callback) {
+    this.placeOrderWithloFlagForUser = function (username, callback) {
+        _this = this;
+        this.slackRequest.text = 'placeorder --lo';
+        var data = this.slackRequest;
+        this.slackRequest.user_name = username;
+
+        request.post('http://localhost:3000', { form: data },
+            function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    callback(body);
+                } else {
+                    _this.lastResponse = response;
+                    throw error;
+                }
+            }
+        );
+    };
+
+    this.getAllOrders = function (restaurant, callback) {
         this.slackRequest.text = 'getorder -a -r ' + restaurant;
         var data = this.slackRequest;
         request.post(
             'http://localhost:3000',
             { form: data },
-            function(error, response, body) {
+            function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
@@ -195,13 +219,13 @@ If you wish to change your order, just place a new one.
         );
     };
 
-    this.cancelOrderForUser = function(username, callback) {
+    this.cancelOrderForUser = function (username, callback) {
         this.slackRequest.text = 'cancelorder';
         var data = this.slackRequest;
         request.post(
             'http://localhost:3000',
             { form: data },
-            function(error, response, body) {
+            function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
@@ -211,10 +235,10 @@ If you wish to change your order, just place a new one.
         );
     };
 
-    this.compareToLastOrderForUser = function(username, res, callback) {
+    this.compareToLastOrderForUser = function (username, res, includeRestaurant, callback) {
         this.lastOrder[username].username = username;
-        var expected = this.convertOrderToString(this.lastOrder[username]);
-        if(expected == res){
+        var expected = this.convertOrderToString(this.lastOrder[username], null, includeRestaurant);
+        if (expected == res) {
             callback(true);
         } else {
             console.log('expected: ' + expected + '\r\n' + 'actual: ' + res);
@@ -222,7 +246,7 @@ If you wish to change your order, just place a new one.
         }
     };
 
-    this.isEmpty = function(o) {
+    this.isEmpty = function (o) {
         for (var i in o) {
             if (o.hasOwnProperty(i)) {
                 return false;
@@ -230,14 +254,65 @@ If you wish to change your order, just place a new one.
         }
         return true;
     };
-    
-    this.convertOrderToString = function(o, username)
-    {
-        var res = "*" + (username ? username : o.username) + "* " + o.main.toLowerCase() + " " + (o.sideorder ? o.sideorder : "") + " " + (o.sauce ? o.sauce : "") + " " + (o.drink ? o.drink : "")  + " " + (o.extra ? o.extra : "");
+
+    this.convertOrderToString = function (o, username, includeRestaurant) {
+        var res = "*" + (username ? username : o.username) + "* " + o.main.toLowerCase() + (o.sideorder ? " " + o.sideorder : "") + (o.sauce ? " " + o.sauce : "") + (o.drink ? " " + o.drink : "") + (o.extra ? " " + o.extra : "") + (includeRestaurant ? " at " + o.restaurant : "");
         return res;
     };
+
+    this.createOldOrder = function (username, order, callback) {
+        if (process.env.DB_ENGINE == 'mssql') {
+            var con = new Connection({
+                userName: process.env.DB_USER,
+                password: process.env.DB_PASS,
+                server: process.env.DB_HOST,
+                options: {
+                    database: process.env.DB_NAME
+                }
+            });
+
+            con.on('connect', function (err) {
+                query = new Request('INSERT INTO orders (username, restaurant, main, sideorder, sauce, drink, extra, canceled, createdAt, updatedAt) VALUES (@username, @restaurant, @main, @sideorder, @sauce, @drink, @extra, @canceled, @createdat, @updatedat)', function (err, rowCount) {
+                    if (err) {
+                        throw err;
+                    } else {
+                        callback();
+                    }
+                });
+
+                query.addParameter('username', TYPES.VarChar, username);
+                query.addParameter('restaurant', TYPES.VarChar, order.restaurant);
+                query.addParameter('main', TYPES.VarChar, order.main);
+                query.addParameter('sideorder', TYPES.VarChar, order.sideorder);
+                query.addParameter('sauce', TYPES.VarChar, order.sauce);
+                query.addParameter('drink', TYPES.VarChar, order.drink);
+                query.addParameter('extra', TYPES.VarChar, order.extra);
+                query.addParameter('canceled', TYPES.Bit, false);
+                query.addParameter('createdat', TYPES.DateTime2, "2016-08-23 20:55:31.0000000");
+                query.addParameter('updatedat', TYPES.DateTime2, "2016-08-23 20:55:31.0000000");
+
+                con.execSql(query);
+            });
+        } else if (process.env.DB_ENGINE == 'postgre') {
+            var client = new pg.Client({
+                user: process.env.DB_USER,
+                database: process.env.DB_NAME,
+                password: process.env.DB_PASS,
+                port: process.env.DB_PORT,
+                host: process.env.DB_HOST
+            });
+            
+            client.query({
+                text: 'INSERT INTO orders VALUES (username = $1, main = $2, sideorder = $3, sauce = $4, drink = $5, extra = $6, canceled = FALSE, createdAt = "2016-08-19 08:46:27.948+00")',
+                values: [username, order.main, order.sideorder, order.sauce, order.drink, order.extra]
+            }).on('end', function () {
+                callback();
+            });
+        }
+
+    }
 }
 
-module.exports = function() {
+module.exports = function () {
     this.World = World;
 };

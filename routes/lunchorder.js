@@ -34,49 +34,59 @@ router.all('/', function (req, res) {
     var command = argsv._;
 
     if (command == 'placeorder') {
-        if(!argsv.r)
-        {
-            var str = 'No restaurant supplied! Please specify one of the following restaurants using the -r flag: ';
-            for (var r of restaurants) {
-                str += '\r\n' + r;
-            }
-            res.send({ 'text': str });
-            return;
-        }
-        if (restaurants.indexOf(argsv.r.toLowerCase()) == -1) {
-            console.log('unknown restaurant: ' + argsv.r);
-            var str = 'Unknown restaurant! Please specify one of the following restaurants: ';
-            for (var r of restaurants) {
-                str += '\r\n' + r;
-            }
-            res.send({ 'text': str });
-            return;
-        }
-
-        var newOrder = new Order(username, argsv.r, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
-
-        if(!newOrder.main)
-        {
-            res.send({'text': 'Oh no! Looks like you didn\'t specify your main dish with the -m flag. Here\'s an example: \r\n /lunchorder placeorder -r "newyork" -m "kebabpizza"'});
-            return;
-        }
-
-        //is there already an order for this user?
-        orderController.getOrderForUser(username, function (order) {
-            if (order) {
-                //update
-                console.log('there is already an order for this user');
-                orderController.updateOrder(order.id, newOrder, function () {
-                    res.send({ 'text': 'Your order has been updated' });
+        if (argsv.lo) {
+            //repeat last order for this user
+            orderController.getLastOrderForUser(username, function (order) {
+                orderController.createOrder(order, function () {
+                    console.log('repeating last order');
+                    res.send({ 'text': 'Thank you for your order! Here is what you ordered: \r\n ' + order.toString() });
+                    return;
                 });
-            } else {
-                //insert
-                orderController.createOrder(newOrder, function () {
-                    console.log('order created in db');
-                    res.send({ 'text': 'Thank you for your order! Here is what you ordered: \r\n ' + newOrder.toString() });
-                });
+            });
+        } else {
+            if (!argsv.r) {
+                var str = 'No restaurant supplied! Please specify one of the following restaurants using the -r flag: ';
+                for (var r of restaurants) {
+                    str += '\r\n' + r;
+                }
+                res.send({ 'text': str });
+                return;
             }
-        });
+            if (restaurants.indexOf(argsv.r.toLowerCase()) == -1) {
+                console.log('unknown restaurant: ' + argsv.r);
+                var str = 'Unknown restaurant! Please specify one of the following restaurants: ';
+                for (var r of restaurants) {
+                    str += '\r\n' + r;
+                }
+                res.send({ 'text': str });
+                return;
+            }
+
+
+            var newOrder = new Order(username, argsv.r, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
+
+            if (!newOrder.main) {
+                res.send({ 'text': 'Oh no! Looks like you didn\'t specify your main dish with the -m flag. Here\'s an example: \r\n /lunchorder placeorder -r "newyork" -m "kebabpizza"' });
+                return;
+            }
+
+            //is there already an order for this user?
+            orderController.getOrderForUser(username, function (order) {
+                if (order) {
+                    //update
+                    console.log('there is already an order for this user');
+                    orderController.updateOrder(order.id, newOrder, function () {
+                        res.send({ 'text': 'Your order has been updated. Here is what you ordered: \r\n' + newOrder.toString(true) });
+                    });
+                } else {
+                    //insert
+                    orderController.createOrder(newOrder, function () {
+                        console.log('order created in db');
+                        res.send({ 'text': 'Thank you for your order! Here is what you ordered: \r\n ' + newOrder.toString(true) });
+                    });
+                }
+            });
+        }
     } else if (command == 'cancelorder') {
         console.log('cancelorder');
         if (!argsv.a) {
@@ -91,7 +101,7 @@ router.all('/', function (req, res) {
             orderController.getOrderForUser(username, function (order) {
                 if (!Util.isEmpty(order)) {
                     console.log(order.toString());
-                    res.send({ 'text': order.toString() });
+                    res.send({ 'text': order.toString(true) });
                 } else {
                     res.send({ 'text': 'No order found for username ' + username });
                 }
@@ -104,7 +114,7 @@ router.all('/', function (req, res) {
                     var result = "";
                     var totals = {};
                     for (var order of orders) {
-                        result += order.toString() + '\n';
+                        result += order.toString(false) + '\n';
 
                         if (isNaN(totals[order.main])) {
                             totals[order.main] = 1;
@@ -119,8 +129,8 @@ router.all('/', function (req, res) {
 
                     res.send({ "text": result });
                 });
-            }else{
-                res.send({'text': 'You need to specify a restaurant with the -r flag'});
+            } else {
+                res.send({ 'text': 'You need to specify a restaurant with the -r flag' });
             }
         }
     } else {

@@ -21,7 +21,7 @@ module.exports = function () {
         });
     });
 
-    this.When(/^I order lunch at (.*)$/, function ( restaurant, callback) {
+    this.When(/^I order lunch at (.*)$/, function (restaurant, callback) {
         var username = 'Steve';
         var world = this;
         var lastOrder = this.lastOrder[username] = {
@@ -32,8 +32,7 @@ module.exports = function () {
             drink: 'Pepsi Max',
             extra: 'Extra lök'
         };
-        try 
-        {
+        try {
             this.placeOrderForUser(username, function (res) {
                 world.lastResponse = JSON.parse(res);
                 callback();
@@ -42,7 +41,7 @@ module.exports = function () {
             console.log('what the fudge');
             console.log(error);
             throw error;
-        } 
+        }
     });
 
     this.When(/^I order lunch without specifying restaurant$/, function (callback) {
@@ -60,10 +59,10 @@ module.exports = function () {
                 world.lastResponse = JSON.parse(res);
                 callback();
             });
-            } catch (error) {
-                console.log(error);
-                throw error;   
-            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     });
 
     this.When(/^I order lunch twice at (.*)$/, function (restaurant, callback) {
@@ -139,7 +138,7 @@ module.exports = function () {
         });
     });
 
-    this.When(/^I order with just the r and m flag$/, function (callback){
+    this.When(/^I order with just the r and m flag$/, function (callback) {
         var world = this;
         var username = "Steve";
         var restaurant = "newyork";
@@ -149,8 +148,30 @@ module.exports = function () {
             main: "Kebabpizza"
         };
 
-        this.placeOrderForUser(username, function(res){
+        this.placeOrderForUser(username, function (res) {
             world.lastResponse = JSON.parse(res);
+            callback();
+        });
+    });
+
+    this.When(/^I have an order at (.*)$/, function (restaurant, callback) {
+        var username = 'Steve';
+        var lastOrder = this.lastOrder[username] = {
+            restaurant: restaurant,
+            main: 'cheese',
+            sideorder: 'Wedges',
+            sauce: 'Bea',
+            drink: 'Pepsi Max',
+            extra: 'Extra lök'
+        };
+        this.createOldOrder(username, lastOrder, function () {
+            callback();
+        });
+    });
+
+    this.When(/^I order lunch with the lo flag$/, function (callback) {
+        var username = 'Steve';
+        this.placeOrderWithloFlagForUser(username, function(){
             callback();
         });
     });
@@ -164,7 +185,7 @@ module.exports = function () {
         this.getOrderForUser(username, function (res) {
             world.lastResponse = JSON.parse(res);
             oRes = JSON.parse(res).text;
-            world.compareToLastOrderForUser(username, oRes, function (equal) {
+            world.compareToLastOrderForUser(username, oRes, true, function (equal) {
                 assert(equal);
                 callback();
             });
@@ -181,7 +202,7 @@ module.exports = function () {
 
             for (var key in world.lastOrder) {
                 world.lastOrder[key].username = key;
-                assert(actualStr.indexOf(world.convertOrderToString(world.lastOrder[key])) != -1);
+                assert(actualStr.indexOf(world.convertOrderToString(world.lastOrder[key], null, false)) != -1);
 
                 var main = world.lastOrder[key].main;
 
@@ -220,33 +241,32 @@ module.exports = function () {
         callback();
     });
 
-    this.Then(/^I should get a list of all the restaurants$/, function (callback){
+    this.Then(/^I should get a list of all the restaurants$/, function (callback) {
         var expected = 'Unknown restaurant! Please specify one of the following restaurants: ';
         expected += '\r\nlillaoskar';
-        expected += '\r\nnewyork'; 
-        assert.equal(expected, this.lastResponse.text);
-        callback();
-    });
-    
-    this.Then(/^I should get an error message and a list of all the restaurants$/, function (callback) {
-        var expected = 'No restaurant supplied! Please specify one of the following restaurants using the -r flag: ';
-        expected += '\r\nlillaoskar';
-        expected += '\r\nnewyork'; 
+        expected += '\r\nnewyork';
         assert.equal(expected, this.lastResponse.text);
         callback();
     });
 
-    this.Then(/^I should get a warning about missing parameters$/, function(callback){
+    this.Then(/^I should get an error message and a list of all the restaurants$/, function (callback) {
+        var expected = 'No restaurant supplied! Please specify one of the following restaurants using the -r flag: ';
+        expected += '\r\nlillaoskar';
+        expected += '\r\nnewyork';
+        assert.equal(expected, this.lastResponse.text);
+        callback();
+    });
+
+    this.Then(/^I should get a warning about missing parameters$/, function (callback) {
         var expected = 'Oh no! Looks like you didn\'t specify your main dish with the -m flag. Here\'s an example: \r\n /lunchorder placeorder -r "newyork" -m "kebabpizza"';
         assert.equal(expected, this.lastResponse.text);
         callback();
     });
 
-    this.Then(/^I should get the correct text in the response$/, function(callback){
-        var expected = 'Thank you for your order! Here is what you ordered: \r\n ' + this.convertOrderToString(this.lastOrder['Steve'], 'Steve');
+    this.Then(/^I should get the correct text in the response$/, function (callback) {
+        var expected = 'Thank you for your order! Here is what you ordered: \r\n ' + this.convertOrderToString(this.lastOrder['Steve'], 'Steve', true);
         var actual = this.lastResponse.text;
-
-        assert.equal(expected, this.lastResponse.text);
+        assert.equal(expected, actual);
         callback();
     });
 }

@@ -7,7 +7,9 @@ Help.placeOrderHelp = `*placeorder*: Places an order
 
 The -r flag and the -m flag are mandatory, the rest are optional.
 
-If you wish to change your order, just place a new one.`;
+If you wish to change your order, just place a new one.
+
+New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't that neat?`;
                             
 Help.getOrderHelp = `*getorder*: Gets your order
 *Usage*: /lunchorder getorder`;

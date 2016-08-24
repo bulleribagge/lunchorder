@@ -30,8 +30,30 @@ Model.create = function(callback) {
         canceled: Sequelize.BOOLEAN
     },{
         instanceMethods:{
-            toString: function(){
-                var res = "*" + this.username + "* " + this.main + " " + (this.sideorder ? this.sideorder : "") + " " + (this.sauce ? this.sauce : "") + " " + (this.drink ? this.drink : "")  + " " + (this.extra ? this.extra : "");
+            toString: function(includeRestaurant){
+                var res = "*" + this.username + "*";
+                res += " " + this.main;
+                if(this.sideorder)
+                {
+                    res += " " + this.sideorder;
+                }
+                if(this.sauce)
+                {
+                    res += " " + this.sauce;
+                }
+                if(this.drink)
+                {
+                    res += " " + this.drink;
+                }
+                if(this.extra)
+                {
+                    res += " " + this.extra;
+                }
+
+                if(includeRestaurant)
+                {
+                    res += " at " + this.restaurant;
+                }
                 return res;
             }
         }
