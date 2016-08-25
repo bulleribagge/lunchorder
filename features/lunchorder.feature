@@ -59,8 +59,13 @@ Feature: Order lunch
         When I order with just the r and m flag
         Then I should see my order 
 
-        @wip
     Scenario: Repeat last order
         When I have an order at lillaoskar
         And I order lunch with the lo flag
         Then I should see my order
+
+        @wip
+    Scenario: Getorder -a with no orders
+        Given there are no orders
+        When I get all orders
+        Then I should see the warning text

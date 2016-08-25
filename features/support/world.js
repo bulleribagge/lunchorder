@@ -167,7 +167,7 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
     };
 
     this.placeOrderForUser = function (username, callback) {
-        _this = this;
+        var world = this;
         this.slackRequest.text = 'placeorder';
         this.slackRequest.text = this.buildOrderTextForUser(username);
         var data = this.slackRequest;
@@ -178,7 +178,7 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
-                    _this.lastResponse = response;
+                    world.lastResponse = response;
                     throw error;
                 }
             }
@@ -186,7 +186,7 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
     };
 
     this.placeOrderWithloFlagForUser = function (username, callback) {
-        _this = this;
+        var world = this;
         this.slackRequest.text = 'placeorder --lo';
         var data = this.slackRequest;
         this.slackRequest.user_name = username;
@@ -196,7 +196,7 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
-                    _this.lastResponse = response;
+                    world.lastResponse = response;
                     throw error;
                 }
             }

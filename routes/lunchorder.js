@@ -127,7 +127,7 @@ router.all('/', function (req, res) {
                         result += key + ': ' + totals[key] + '\n';
                     }
 
-                    res.send({ "text": result });
+                    res.send({ "text": result === "" ? "No orders for this restaurant today" : result });
                 });
             } else {
                 res.send({ 'text': 'You need to specify a restaurant with the -r flag' });

@@ -10,6 +10,10 @@ module.exports = function () {
         callback();
     });
 
+    this.Given(/^there are no orders$/, function (callback) {
+        callback();
+    });
+
     /* ----------------------------- WHEN ----------------------------- */
     this.When(/^I order lunch without parameters$/, function (callback) {
         var username = 'Steve';
@@ -176,6 +180,15 @@ module.exports = function () {
         });
     });
 
+    this.When(/^I get all orders$/, function (callback) {
+        var restaurant = 'lillaoskar';
+        var world = this;
+        this.getAllOrders(restaurant, function(res){
+            world.lastResponse = JSON.parse(res);
+            callback();
+        });
+    });
+
     /* ----------------------------- THEN ----------------------------- */
 
     this.Then(/^I should see my order$/, function (callback) {
@@ -268,5 +281,12 @@ module.exports = function () {
         var actual = this.lastResponse.text;
         assert.equal(expected, actual);
         callback();
+    });
+
+    this.Then(/^I should see the warning text$/, function (callback) {
+       var expected = 'No orders for this restaurant today';
+       var actual = this.lastResponse.text;
+       assert.equal(expected, actual);
+       callback(); 
     });
 }
