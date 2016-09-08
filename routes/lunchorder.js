@@ -37,11 +37,13 @@ router.all('/', function (req, res) {
         if (argsv.lo) {
             //repeat last order for this user
             orderController.getLastOrderForUser(username, function (order) {
-                orderController.createOrder(order, function () {
-                    console.log('repeating last order');
-                    res.send({ 'text': 'Thank you for your order! Here is what you ordered: \r\n ' + order.toString() });
-                    return;
-                });
+                if (order) {
+                    orderController.insertOrUpdateOrder(username, order, function (order) {
+                        res.send({ 'text': 'Thank you for your order! Here is what you ordered: \r\n' + order.toString(true) });
+                    });
+                }else{
+                    res.send({'text':'Sorry, seems like we cannot find your last order. Please place an order the old fashioned way :)'});
+                }
             });
         } else {
             if (!argsv.r) {
@@ -62,7 +64,6 @@ router.all('/', function (req, res) {
                 return;
             }
 
-
             var newOrder = new Order(username, argsv.r, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
 
             if (!newOrder.main) {
@@ -70,21 +71,15 @@ router.all('/', function (req, res) {
                 return;
             }
 
-            //is there already an order for this user?
-            orderController.getOrderForUser(username, function (order) {
-                if (order) {
-                    //update
-                    console.log('there is already an order for this user');
-                    orderController.updateOrder(order.id, newOrder, function () {
-                        res.send({ 'text': 'Your order has been updated. Here is what you ordered: \r\n' + newOrder.toString(true) });
-                    });
-                } else {
-                    //insert
-                    orderController.createOrder(newOrder, function () {
-                        console.log('order created in db');
-                        res.send({ 'text': 'Thank you for your order! Here is what you ordered: \r\n ' + newOrder.toString(true) });
-                    });
-                }
+            //for placing orders for another user
+            if(argsv.u)
+            {
+                username = argsv.u.replace(/@/g, "");
+                newOrder.username = username;
+            }
+
+            orderController.insertOrUpdateOrder(username, newOrder, function (order) {
+                res.send({ 'text': 'Thank you for your order! Here is what you ordered: \r\n' + order.toString(true) });
             });
         }
     } else if (command == 'cancelorder') {

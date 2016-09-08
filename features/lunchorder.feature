@@ -13,7 +13,7 @@ Feature: Order lunch
 
     Scenario Outline: Order lunch at a restaurant
         When I order lunch at <restaurant>
-        Then I should see my order
+        Then I should see the order for Steve
 
     Examples:
         |restaurant |
@@ -30,7 +30,7 @@ Feature: Order lunch
     
     Scenario: Order lunch twice
         When I order lunch twice at lillaoskar
-        Then I should see my order
+        Then I should see the order for Steve
         
     Scenario: Get all orders
         When many people have ordered at lillaoskar
@@ -57,15 +57,32 @@ Feature: Order lunch
 
     Scenario: Order with just the r and m flag
         When I order with just the r and m flag
-        Then I should see my order 
+        Then I should see the order for Steve 
 
     Scenario: Repeat last order
-        When I have an order at lillaoskar
-        And I order lunch with the lo flag
-        Then I should see my order
+        Given I have an order at lillaoskar
+        When I order lunch with the lo flag
+        Then I should see the order for Steve
 
-        @wip
+    Scenario: Repeat last order when last order does not exist
+        When I order lunch with the lo flag
+        Then I should see the warning text about the lo flag 
+
+    Scenario: Repeat last order more than once
+        Given I have an order at lillaoskar
+        When I order lunch with the lo flag
+        And I order lunch with the lo flag
+        Then I should see the order for Steve
+
     Scenario: Getorder -a with no orders
         Given there are no orders
         When I get all orders
         Then I should see the warning text
+
+    Scenario: Order for another user
+        When I order lunch for someone else
+        Then I should see the order for Lucy
+
+    Scenario: Order twice and change restaurant
+        When I order lunch twice at different restaurants
+        Then I should see the order for Steve

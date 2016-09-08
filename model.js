@@ -59,7 +59,6 @@ Model.create = function(callback) {
         }
     });
     
-    
     sequelize.sync().then(function(){
         callback();
     }).catch(function(error){

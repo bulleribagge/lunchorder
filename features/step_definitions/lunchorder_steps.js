@@ -14,6 +14,21 @@ module.exports = function () {
         callback();
     });
 
+    this.When(/^I have an order at (.*)$/, function (restaurant, callback) {
+        var username = 'Steve';
+        var lastOrder = this.lastOrder[username] = {
+            restaurant: restaurant,
+            main: 'cheese',
+            sideorder: 'Wedges',
+            sauce: 'Bea',
+            drink: 'Pepsi Max',
+            extra: 'Extra lök'
+        };
+        this.createOldOrder(username, lastOrder, function () {
+            callback();
+        });
+    });
+
     /* ----------------------------- WHEN ----------------------------- */
     this.When(/^I order lunch without parameters$/, function (callback) {
         var username = 'Steve';
@@ -42,7 +57,6 @@ module.exports = function () {
                 callback();
             });
         } catch (error) {
-            console.log('what the fudge');
             console.log(error);
             throw error;
         }
@@ -69,7 +83,7 @@ module.exports = function () {
         }
     });
 
-    this.When(/^I order lunch twice at (.*)$/, function (restaurant, callback) {
+    this.When(/^I order lunch twice at (\w+)$/, function (restaurant, callback) {
         var username = 'Steve';
         var world = this;
         this.lastOrder[username] = {
@@ -158,24 +172,11 @@ module.exports = function () {
         });
     });
 
-    this.When(/^I have an order at (.*)$/, function (restaurant, callback) {
-        var username = 'Steve';
-        var lastOrder = this.lastOrder[username] = {
-            restaurant: restaurant,
-            main: 'cheese',
-            sideorder: 'Wedges',
-            sauce: 'Bea',
-            drink: 'Pepsi Max',
-            extra: 'Extra lök'
-        };
-        this.createOldOrder(username, lastOrder, function () {
-            callback();
-        });
-    });
-
     this.When(/^I order lunch with the lo flag$/, function (callback) {
+        var world = this;
         var username = 'Steve';
-        this.placeOrderWithloFlagForUser(username, function(){
+        this.placeOrderWithloFlagForUser(username, function (res) {
+            world.lastResponse = JSON.parse(res);
             callback();
         });
     });
@@ -183,22 +184,79 @@ module.exports = function () {
     this.When(/^I get all orders$/, function (callback) {
         var restaurant = 'lillaoskar';
         var world = this;
-        this.getAllOrders(restaurant, function(res){
+        this.getAllOrders(restaurant, function (res) {
             world.lastResponse = JSON.parse(res);
             callback();
         });
     });
 
+    this.When(/^I order lunch for someone else$/, function (callback) {
+        var world = this;
+        var username = 'Steve';
+        var orderFor = 'Lucy';
+        var restaurant = 'lillaoskar';
+
+        this.lastOrder[username] = {
+            restaurant: restaurant,
+            main: 'Cheese',
+            sideorder: 'Wedges',
+            sauce: 'Bea',
+            drink: 'Pepsi Max',
+            extra: 'Extra lök',
+            orderFor: orderFor
+        };
+
+        this.placeOrderForOtherUser(username, orderFor, function () {
+            callback();
+        });
+    });
+
+    this.When(/^I order lunch twice at different restaurants$/, function(callback){
+        var world = this;
+        var username = 'Steve';
+        var restaurant = 'lillaoskar';
+
+        this.lastOrder[username] = {
+            restaurant: restaurant,
+            main: 'BBQ',
+            sideorder: 'Pommes',
+            sauce: 'Aioli',
+            drink: 'Pepsi',
+            extra: 'ingen lök'
+        };
+
+        world.placeOrderForUser(username, function(){
+            world.lastOrder[username] = {
+                restaurant: 'newyork',
+                main: 'Kebabpizza',
+                sideorder: '',
+                sauce: 'Mild',
+                drink: 'Pepsi',
+                extra: ''
+            };
+
+            world.placeOrderForUser(username, function(){
+                callback();
+            });
+        });
+    });
+
     /* ----------------------------- THEN ----------------------------- */
 
-    this.Then(/^I should see my order$/, function (callback) {
-        var username = 'Steve';
-        var lastOrder = this.lastOrder[username];
+    this.Then(/^I should see the order for (.*)$/, function (username, callback) {
         var world = this;
+        var orderedBy = "";
+        for (var user in this.lastOrder) {
+            if (world.lastOrder[user].orderFor == username) {
+                orderedBy = user;
+                username = world.lastOrder[user].orderFor;
+            }
+        }
+        
         this.getOrderForUser(username, function (res) {
             world.lastResponse = JSON.parse(res);
             oRes = JSON.parse(res).text;
-            world.compareToLastOrderForUser(username, oRes, true, function (equal) {
+            world.compareToLastOrderForUser(username, oRes, true, orderedBy, function (equal) {
                 assert(equal);
                 callback();
             });
@@ -277,16 +335,23 @@ module.exports = function () {
     });
 
     this.Then(/^I should get the correct text in the response$/, function (callback) {
-        var expected = 'Thank you for your order! Here is what you ordered: \r\n ' + this.convertOrderToString(this.lastOrder['Steve'], 'Steve', true);
+        var expected = 'Thank you for your order! Here is what you ordered: \r\n' + this.convertOrderToString(this.lastOrder['Steve'], 'Steve', true);
         var actual = this.lastResponse.text;
         assert.equal(expected, actual);
         callback();
     });
 
     this.Then(/^I should see the warning text$/, function (callback) {
-       var expected = 'No orders for this restaurant today';
-       var actual = this.lastResponse.text;
-       assert.equal(expected, actual);
-       callback(); 
+        var expected = 'No orders for this restaurant today';
+        var actual = this.lastResponse.text;
+        assert.equal(expected, actual);
+        callback();
+    });
+
+    this.Then(/^I should see the warning text about the lo flag$/, function (callback) {
+        var expected = 'Sorry, seems like we cannot find your last order. Please place an order the old fashioned way :)';
+        var actual = this.lastResponse.text;
+        assert.equal(expected, actual);
+        callback();
     });
 }

@@ -92,6 +92,10 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
             ot += ' -e "' + this.lastOrder[username].extra + '"';
         }
 
+        if (this.lastOrder[username].orderFor && this.lastOrder[username].orderFor !== '') {
+            ot += ' -u "' + this.lastOrder[username].orderFor + '"';
+        }
+
         return ot;
     };
 
@@ -203,6 +207,24 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
         );
     };
 
+    this.placeOrderForOtherUser = function (username, orderFor, callback) {
+        var world = this;
+        this.slackRequest.text += this.buildOrderTextForUser(username, orderFor);
+        var data = this.slackRequest;
+        this.slackRequest.user_name = username;
+
+        request.post('http://localhost:3000', { form: data },
+            function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    callback(body);
+                } else {
+                    world.lastResponse = response;
+                    throw error;
+                }
+            }
+        );
+    };
+
     this.getAllOrders = function (restaurant, callback) {
         this.slackRequest.text = 'getorder -a -r ' + restaurant;
         var data = this.slackRequest;
@@ -235,9 +257,23 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
         );
     };
 
-    this.compareToLastOrderForUser = function (username, res, includeRestaurant, callback) {
-        this.lastOrder[username].username = username;
-        var expected = this.convertOrderToString(this.lastOrder[username], null, includeRestaurant);
+    this.compareToLastOrderForUser = function (username, res, includeRestaurant, orderedBy, callback) {
+        var world = this;
+        var expected = ""; 
+
+        if(orderedBy && orderedBy !== "")
+        {
+            for(var o in this.lastOrder)
+            {
+                if(world.lastOrder[o].orderFor == username && o == orderedBy)
+                {
+                    expected = world.convertOrderToString(world.lastOrder[o], world.lastOrder[o].orderFor, true);
+                }
+            }
+        }else{
+            expected = world.convertOrderToString(world.lastOrder[username], username, true);
+        }
+
         if (expected == res) {
             callback(true);
         } else {
@@ -301,7 +337,7 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
                 port: process.env.DB_PORT,
                 host: process.env.DB_HOST
             });
-            
+
             client.query({
                 text: 'INSERT INTO orders VALUES (username = $1, main = $2, sideorder = $3, sauce = $4, drink = $5, extra = $6, canceled = FALSE, createdAt = "2016-08-19 08:46:27.948+00")',
                 values: [username, order.main, order.sideorder, order.sauce, order.drink, order.extra]
