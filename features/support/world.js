@@ -164,7 +164,7 @@ New feature! Type /lunchorder placeorder --lo to repeat your last order. Isn't t
                 if (!error && response.statusCode == 200) {
                     callback(body);
                 } else {
-                    throw 'Something went wrong';
+                    throw 'Something went wrong'; 
                 }
             }
         );

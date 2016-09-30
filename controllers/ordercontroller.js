@@ -20,7 +20,7 @@ OrderController.prototype.createOrder = function (order, callback) {
         console.log('order created');
         callback(true);
     });
-};
+}; 
 
 OrderController.prototype.insertOrUpdateOrder = function (username, newOrder, callback) {
     var oc = this;

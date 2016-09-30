@@ -27,7 +27,7 @@ Model.create = function(callback) {
         sauce: Sequelize.STRING(50),
         drink: Sequelize.STRING(50),
         extra: Sequelize.STRING(50),
-        canceled: Sequelize.BOOLEAN
+        canceled: Sequelize.BOOLEAN 
     },{
         instanceMethods:{
             toString: function(includeRestaurant){

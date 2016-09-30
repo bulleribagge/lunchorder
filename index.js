@@ -18,5 +18,5 @@ app.use('/', routes);
 
 Model.create(function(){
     app.listen(process.env.PORT || port);
-    console.log('listening on port ' + port + ' ...');        
+    console.log('listening on port ' + port + ' ...');     
 });

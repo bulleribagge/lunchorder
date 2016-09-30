@@ -85,7 +85,7 @@ module.exports = function () {
 
     this.When(/^I order lunch twice at (\w+)$/, function (restaurant, callback) {
         var username = 'Steve';
-        var world = this;
+        var world = this; 
         this.lastOrder[username] = {
             restaurant: restaurant,
             main: 'Cheese',

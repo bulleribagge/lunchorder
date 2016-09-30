@@ -18,7 +18,7 @@ Feature: Order lunch
     Examples:
         |restaurant |
         |lillaoskar |
-        |newyork    |
+        |newyork    | 
         
     Scenario: Order lunch at a restaurant
         When I order lunch at lillaoskar

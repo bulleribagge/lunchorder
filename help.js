@@ -21,4 +21,4 @@ Help.getHelp = function(){
     return this.placeOrderHelp + '\n\n' + this.getOrderHelp + '\n\n' + this.cancelOrderHelp;
 };
 
-module.exports = Help;
+module.exports = Help; 

@@ -13,7 +13,7 @@ class Order
         this.drink = drink;
         this.extra = extra;
     }
-    
+     
     toString(includeRestaurant)
     {
         var res = "*" + this.username + "*";
