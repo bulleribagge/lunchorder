@@ -62,7 +62,7 @@ router.all('/', function (req, res) {
                 }
                 res.send({ 'text': str });
                 return;
-            }
+            } 
 
             var newOrder = new Order(username, argsv.r, argsv.m, argsv.so, argsv.s, argsv.d, argsv.e);
 
