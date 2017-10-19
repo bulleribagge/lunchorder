@@ -27,8 +27,5 @@
     "tedious": "^1.13.2",
     "yargs": "^4.3.2",
     "cors": "^2.7.1"
-  },
-  "devDependencies": {
-    "async": "^1.5.2"
   }
 }
