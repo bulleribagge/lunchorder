@@ -1,2 +1,2 @@
 # lunchorder
-Tool to help you order dem lunches
+Tool to help you order lunch via slack
